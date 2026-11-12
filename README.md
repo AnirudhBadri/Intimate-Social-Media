@@ -6,6 +6,14 @@
 
 ---
 
+> [!WARNING]
+> **Work-in-Progress & Prototype Notice:**  
+> **The Den is an experimental prototype and design exploration.** Most features described in this document are currently either in-progress proofs-of-concept or architectural milestones on the roadmap.  
+> 
+> This README documents the **core ethos, design philosophy, and system invariants** of the project—the antidote to algorithmic broadcast feeds and audience capture. For an honest breakdown of what is currently working in the prototype versus what is planned, see the [Feature Status & Roadmap](#feature-status--roadmap) section below.
+
+---
+
 ### The Premise: We Built Broadcast Engines and Called Them Friends
 
 Every major social network is an algorithmic strip-mine. 
@@ -56,6 +64,55 @@ The biggest friction in modern messaging is the asymmetry of reply obligations:
 - **Mutual Lore Consecration:** Inside jokes don't become permanent artifacts on the wall because one person posted them; they require multi-party consensus to be consecrated into the space's permanent history.
 - **Asynchronous Slow Games:** One board, one turn every few days. The game moves at the pace of human life, not push notifications.
 - **Acoustic Corner Booth:** A private 1-on-1 audio sanctuary for deep sparring, voice dispatches, and raw reflection without a broadcast feed.
+
+---
+
+### Conversation Memory: Tangent Cards & Unfinished Threads
+
+Most AI in messaging apps is useless theater—chatbots pretending to be human or generating corporate "meeting notes" for casual hangouts.
+
+The Den's **Tangent Indexer** is basically a quiet index card box on the coffee table. Real friends drop conversations all the time because life happens. You don't need a summary with bulleted action items; you just want a trigger so you don't default to *"How's work?"* or *"Long time no see."*
+
+#### 1. What It Tracks
+
+- **Unfinished Debates (`unfinished_debate`)**  
+  You spent two hours arguing about monoliths vs. microservices, or whether a film was brilliant or pretentious. Work interrupted, nobody conceded, and you both went to sleep. A card saves the crux so next week you can jump back in without reheating the soup.  
+  *Context:* Dave: *"Microservices are overkill for three people."* / Badri: *"Network boundaries prevent monolith rot!"*  
+  *Opener:* *"Hey Dave, did you ever find an actual counter-argument on monolith rot, or are we calling it a draw?"*
+
+- **Pending Crossroads (`unresolved_decision`)**  
+  A friend mentions weighing a job offer in Tokyo, moving cities, or quitting a startup. Two weeks pass, and people forget because daily routines take over. The card flags that a major pivot was on the table so you actually remember to ask what happened.  
+  *Context:* Dave: *"Got an engineering leadership ping for Tokyo, weighing the timezone shift."*  
+  *Opener:* *"Dave, did you ever make a call on that Tokyo offer, or did you stay put?"*
+
+- **Shared Rabbit Holes (`deep_rabbit_hole`)**  
+  You both fell down a 2 AM rabbit hole about vintage 80s Casio synth modifications or 70s Japanese city pop. The card saves the link cluster so the shared obsession doesn't evaporate into the bottom of a WhatsApp export.  
+  *Context:* Two hours sharing schematics for 1980s Casio keyboard solder mods.  
+  *Opener:* *"Still thinking about that vintage synth modification rabbit hole from Tuesday."*
+
+#### 2. The Architecture & Privacy Contract
+
+- **No Public Model Training:** Chat exports and voice transcripts are processed in-memory. Nothing is ever sent to train third-party foundation models.
+- **Local-First / On-Device:** Runs against a local lightweight model (Ollama / quantized local weights) or ephemeral in-memory processors.
+- **Encrypted at Rest:** Tangent index cards live strictly inside your Den’s local database. No central server reads your cards.
+
+---
+
+### Feature Status & Roadmap
+
+> [!NOTE]
+> This project is an ongoing engineering and design exploration. Below is an honest breakdown of what is actually running in the prototype today versus what is partially built or planned.
+
+| Feature Area | Component | Status | Reality Check |
+| :--- | :--- | :--- | :--- |
+| **Dunbar Core** | $N \le 15$ Member Ceiling | **[PROTOTYPE WORKING]** | Enforced mathematically in `den_prototype/engine.py`. Hard error on 16th user. |
+| **Spatial Presence** | 3D Living Room Canvas | **[PROTOTYPE WORKING]** | Three.js WebGL room with fireplace, desk, and furniture states running on `localhost:8090`. |
+| **Ambient Telemetry** | Passive Exhaust Feeds | **[PROTOTYPE WORKING]** | Mocked live streams for Spotify playing tracks, Letterboxd logs, and GitHub commits. |
+| **Zero-Debt Rituals** | Embers & Hearth Timers | **[PROTOTYPE WORKING]** | Transient warmth pings (no unread counters) and shared focus fireplace timers. |
+| **Conversation Memory** | Tangent Index Cards | **[PARTIALLY DONE]** | In-memory schema & classifier in `tangent_service.py` extracts debates, crossroads, and rabbit holes from pasted text. Local LLM (Ollama) integration for noisy audio transcripts is in progress. |
+| **Privacy & Storage** | Local Encrypted Vault | **[PARTIALLY DONE]** | Currently uses local in-memory/SQLite state; cryptographic at-rest vault for tangent cards is on the roadmap. |
+| **Audio Hub** | 1-on-1 Acoustic Booth | **[PLANNED]** | Private WebRTC audio pipe with automatic ambient room soundscapes and ephemeral voice dispatches. |
+| **Multi-Den Federation** | Sovereign Private Nodes | **[PLANNED]** | Self-hosted instances communicating peer-to-peer without a centralized cloud platform. |
 
 ---
 

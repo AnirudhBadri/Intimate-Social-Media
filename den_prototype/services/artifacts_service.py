@@ -7,8 +7,8 @@ class ArtifactsService:
     """Reads and serves markdown blueprint documents from the artifact repository."""
 
     DEFAULT_ARTIFACT_DIRS = [
-        r"C:\Users\badri\.gemini\antigravity\brain\85f24069-6998-4096-a07f-9ba60ff48bcb",
         os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "artifacts"),
+        r"C:\Users\badri\.gemini\antigravity\brain\85f24069-6998-4096-a07f-9ba60ff48bcb",
     ]
 
     def __init__(self, custom_dir: str = None):
