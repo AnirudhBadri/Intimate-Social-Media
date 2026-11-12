@@ -1,63 +1,92 @@
-# Intimate Social Media: The Den
-### *An Anti-Engagement Farm & Artisan 3D Spatial Sanctuary for Genuine Human Connection*
+# The Den: Intimate Social Media
+
+> *"Namma panradhu nammala mudinjadha pannittu, meedhiya Perumal-ta vittudanum."*  
+> (Do what is within your power; surrender the outcome to the universe.)  
+> — Traditional Tamil dictum / *Bhagavad Gita* 2.47
 
 ---
 
-## 1. The Core Manifesto: Why Small Social Media Matters
+### The Premise: We Built Broadcast Engines and Called Them Friends
 
-Modern social media platforms are **engagement farms** engineered on algorithmic dopamine loops, infinite scroll treadmills, rage-baiting, context collapse, and parasitic advertising metrics. They treat human relationships like monetizable inventory:
-- **Metrics over Meaning:** Follower counts, like ratios, retweets, and viral reach incentivize outrage, performative vulnerability, and shallow broadcast culture.
-- **Context Collapse:** Close confidants, distant acquaintances, employers, and anonymous adversaries are crushed into a single public feed, destroying psychological safety and authentic communication.
-- **Asymmetric Reply Debt:** Unread message indicators, red notification badges, and read receipts transform casual socializing into an anxiety-inducing administrative burden.
+Every major social network is an algorithmic strip-mine. 
 
-### The Antidote: Intimate Social Media
-**The Den** is a standalone, bounded, anti-algorithmic digital living room designed for high-trust human cohorts (families, close friends, research collaborators):
-1. **Mathematical Dunbar Cap ($N \le 15$):** Strict mathematical enforcement of Robin Dunbar’s core support clique size ($10-15$ individuals). A Den cannot be expanded beyond 15 members—eliminating the incentive to build an audience.
-2. **Ambient Exhaust over Performative Broadcasts:** Instead of manual status updates and curated photos, presence is communicated passively through real-time ambient exhausts (what music you're listening to via Spotify, movies you've logged on Letterboxd, code commits on GitHub, and hearth status).
-3. **Zero-Debt Presence (Embers & Familiars):** Sending an "Ember" or letting AI familiars interact in the dog park conveys warmth and acknowledgment without creating a reply obligation or notification backlog.
-4. **Mutual Lore Consecration:** Inside jokes, quotes, and memories require multi-party consensus to be consecrated into the permanent Den lore wall.
-5. **Acoustic Corner Booth & Spatial Voice:** Dedicated private nooks for deep epistemic sparring, audio voice exchanges, and shared reflection without public exposure.
+They take an evolutionary animal designed to maintain maybe a dozen high-trust relationships, shove a megaphone in its hands, drop it into an arena with eight billion strangers, and measure its worth by how much noise it can provoke before midnight.
+
+When you broadcast to an audience:
+1. **Context collapses into a performance:** You cannot speak the same way to your mother, your old college roommate, your manager, and an anonymous teenager looking for blood in quote-tweets. When all four sit in the same room, you stop speaking honestly; you produce sanitized PR or provocative slop.
+2. **Conversation becomes debt:** A red notification bubble is a digital subpoena. Read receipts and unread badges turn casual contact into an endless administrative backlog of guilt.
+3. **The feed rewards spectacle over presence:** The algorithm doesn't care if you had an honest 2 AM talk with your best friend. It cares whether your post made 500 strangers angry enough to scroll for another twenty minutes.
+
+**The Den** is an experiment in the opposite direction. It is a standalone, bounded digital sanctuary built on three immovable boundaries.
 
 ---
 
-## 2. System Architecture & Features
+### The Three Invariants
 
 ```
-+-----------------------------------------------------------------------------------+
-|                           THE DEN ARCHITECTURE                                    |
-+-----------------------------------------------------------------------------------+
-|  FRONTEND (Three.js WebGL)      BACKEND (FastAPI / WebSockets)   STATE & ISOLATION|
-|  - 3D Spatial Living Room       - Modular FastAPI Routers        - In-Memory State|
-|  - Real-time Avatar Positions   - Real-time WebSocket Hub        - Air-Gapped Dens|
-|  - Interactive Furnishings      - REST APIs (Booth, Lore, Poll)  - Multi-Sanctum  |
-+-----------------------------------------------------------------------------------+
++---------------------------------------------------------------------------------------+
+|                                  THE DEN INVARIANTS                                   |
++---------------------------------------------------------------------------------------+
+| 1. HARD DUNBAR CEILING (N <= 15) :: Mathematically blocked at 15. No audience to farm.|
+| 2. AMBIENT EXHAUST OVER SPECS     :: Presence through telemetry, not performative text. |
+| 3. ZERO-DEBT RECIPROCITY         :: Embers, shared hearths, and asynchronous slow turns.|
++---------------------------------------------------------------------------------------+
 ```
 
-### Core Subsystems
-- **3D Spatial Living Room Client (`den_prototype/templates/index.html`):** An artisan Three.js canvas featuring customizable room themes, avatars, interactive furniture (record player, bookshelf, hearth, coffee table), and ambient lighting.
-- **The Dunbar Guard (`den_prototype/engine.py`):** Mathematically forbids adding a 16th user to maintain an authentic intimate cohort.
-- **Ambient Exhausts (`den_prototype/models/exhaust.py`):** Live streaming of Spotify tracks, Letterboxd film logs, and GitHub development telemetry.
-- **Asynchronous Slow Games & Micro-Polls (`den_prototype/models/social.py`):** Turn-based casual board games and low-friction group consensus tools that respect members' time and attention.
-- **Acoustic Corner Booth (`den_prototype/routers/booth_router.py`):** Private audio and tangent recording sanctuary for 1-on-1 dialogue.
-- **Air-Gapped Multi-Den Isolation:** Seamlessly switch between separate intimate spheres (e.g. *Buddies Den*, *Family Sanctum*, *Sovereign Hearth*) with zero data leakage.
+#### 1. The Hard Dunbar Boundary ($N \le 15$)
+A Den has a hard, mathematical ceiling of fifteen people. Not as a soft guideline, but as an engine assertion:
+```python
+if len(self.users) >= self.dunbar_cap:  # dunbar_cap = 15
+    return {"success": False, "error": "Dunbar Limit Reached: Cannot exceed 15 members."}
+```
+If you want to add a sixteenth person, someone has to leave or you build another Den. This single constraint kills audience capture at the root: there is no virality, no follower count, and no reason to perform.
+
+#### 2. Ambient Exhaust over Performative Broadcast
+You shouldn't have to write a status update to prove you're alive. In The Den, presence is shared through passive exhausts:
+- What you're actually listening to right now (Spotify real-time stream).
+- What you watched last night and gave three stars to (Letterboxd logs).
+- What code you actually committed to a repository (GitHub exhaust).
+- What room in the 3D living room your avatar is idling in.
+
+You see your friends the way you saw roommates in college: you glance into the living room, see someone on the couch with headphones on, and you know they're there without forcing them to talk.
+
+#### 3. Zero-Debt Presence
+The biggest friction in modern messaging is the asymmetry of reply obligations:
+- **Embers:** Send a transient warmth ping to a friend's hearth. It leaves no unread counter, expects no reply, and creates no administrative guilt.
+- **Mutual Lore Consecration:** Inside jokes don't become permanent artifacts on the wall because one person posted them; they require multi-party consensus to be consecrated into the space's permanent history.
+- **Asynchronous Slow Games:** One board, one turn every few days. The game moves at the pace of human life, not push notifications.
+- **Acoustic Corner Booth:** A private 1-on-1 audio sanctuary for deep sparring, voice dispatches, and raw reflection without a broadcast feed.
 
 ---
 
-## 3. Quick Start & Local Execution
+### System Architecture
 
-### Prerequisites
-- Python 3.10+ (Tested on Python 3.14)
-- Modern Web Browser (Zen Browser, Firefox, Chrome) with WebGL support
+```
+                                  [ THE DEN ]
+                   FastAPI + WebSockets (Local / Self-Hosted)
+                                       │
+        ┌──────────────────────────────┼──────────────────────────────┐
+        │                              │                              │
+        ▼                              ▼                              ▼
+  [ 3D Living Room ]          [ Ambient Exhausts ]           [ The Sanctums ]
+Three.js WebGL canvas:       Passive real-time telemetry:  Air-gapped contexts:
+• Spatial avatar presence    • Spotify playing stream      • Buddies Den (15)
+• Hearth, bookshelf, desk    • Letterboxd reviews          • Family Sanctum
+• Interactive furnishings    • GitHub commit feeds         • Sovereign Hearth
+```
 
-### Running The Den Server
+---
 
-To launch the live spatial server:
+### Running The Den
+
+The prototype runs locally as a standalone Python / Three.js service:
+
 ```powershell
-py -3.14 launch_den_server.py
-```
-Or use the automated verification runner:
-```powershell
+# Run the complete test suite (Dunbar limit, ambient streams, lore voting)
 py -3.14 run_den_prototype.py
+
+# Launch the live interactive living room on localhost:8090
+py -3.14 launch_den_server.py
 ```
 
 Open your browser to:
@@ -67,51 +96,10 @@ http://127.0.0.1:8090
 
 ---
 
-## 4. Repository Structure
+### The Engineering Reality
 
-```text
-Intimate-Social-Media/
-├── README.md                           # Core Manifesto & Architecture Guide
-├── launch_den_server.py                # Standalone server launcher (port 8090)
-├── run_den_prototype.py                # Verification harness & automated test suite
-├── den_prototype/                      # The Den Core Application
-│   ├── app.py                          # FastAPI application factory & router mount
-│   ├── engine.py                       # DenEngine state machine & Dunbar cap enforcer
-│   ├── dependencies.py                 # Engine singleton dependency injection
-│   ├── models/                         # Domain models
-│   │   ├── exhaust.py                  # Spotify, Letterboxd & GitHub passive streams
-│   │   ├── social.py                   # Lore items, micro-polls, dog park familiars, slow game
-│   │   ├── tangents.py                 # Tangent cards, corner booth, sparring challenges
-│   │   ├── state.py                    # Real-time room state & residues
-│   │   ├── layout.py                   # Custom 3D room layout schemas
-│   │   └── user.py                     # User profile & avatar customization
-│   ├── routers/                        # FastAPI REST & WebSocket endpoints
-│   │   ├── den_router.py               # State queries, den switching, hearth focus
-│   │   ├── social_router.py            # Micro-polls, lore consecration, slow game, embers
-│   │   ├── user_router.py              # User profiles, avatars & passive exhausts
-│   │   ├── booth_router.py             # Corner booth private voice & tangents
-│   │   ├── layout_router.py            # Room layouts & generative space themes
-│   │   └── websocket_router.py         # Real-time multi-user live synchronization
-│   ├── services/                       # Specialized domain services
-│   │   ├── lore_service.py             # Multi-party lore consecration
-│   │   ├── game_service.py             # Asynchronous turn-based game logic
-│   │   ├── tangent_service.py          # Audio dispatches & tangent archive
-│   │   ├── theme_service.py            # Ambient generative room themes
-│   │   └── layout_service.py           # Custom 3D furniture & asset placement
-│   ├── static/                         # Textures, audio dispatches & uploaded media
-│   └── templates/
-│       └── index.html                  # Artisan Three.js 3D Spatial Living Room Client
-└── docs/
-    └── ARCHITECTURE.md                 # Technical architecture & protocol documentation
-```
+The temptation is always to make the sandbox bigger—add a discovery tab, let friends of friends peer through the window, build an integration that hooks into X or Bluesky.
 
----
+The moment you do that, the Shannon floor collapses. You are back in the arena, managing impressions, and optimizing for the spectator instead of the friend sitting across the table. 
 
-## 5. Verification & Test Suite
-
-The test runner programmatically asserts:
-- **Dunbar Cap Saturation & Rejection:** Verifies $N=15$ friend ceiling and blocks the 16th member.
-- **Ambient Exhaust Streaming:** Validates Spotify, Letterboxd, and GitHub data flows.
-- **2-Party Lore Consecration:** Asserts consensus voting before quotes become permanent lore.
-- **Zero-Debt Presence:** Tests Ember delivery without conversational reply debt.
-- **FastAPI Endpoints:** Complete HTTP test coverage across all REST and WebSocket routes.
+The Den stays small, or it has no reason to exist.
