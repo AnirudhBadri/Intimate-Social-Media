@@ -1,0 +1,4373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Den — Artisan 3D Spatial Living Room</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛋️</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <!-- Three.js from CDNJS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+    window.onerror = function(msg, url, lineNo, columnNo, error) {
+      console.error("Three.js Den Error: ", msg, url, lineNo, error);
+      const errBox = document.getElementById('error-banner');
+      if (errBox) {
+        errBox.style.display = 'block';
+        errBox.innerText = `Scene notice: ${msg} (Line ${lineNo})`;
+      }
+      return false;
+    };
+  </script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #080604;
+      color: #fef3c7;
+      font-family: 'Inter', -apple-system, sans-serif;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      user-select: none;
+    }
+
+    /* 3D WebGL Canvas */
+    #webgl-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      display: block;
+    }
+
+    /* Top Bar */
+    .top-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 64px;
+      background: linear-gradient(to bottom, rgba(12, 8, 5, 0.96), rgba(12, 8, 5, 0.5), transparent);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 24px;
+      z-index: 50;
+      pointer-events: none;
+    }
+
+    .top-bar > * {
+      pointer-events: auto;
+    }
+
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-title h1 {
+      font-family: 'Cinzel', serif;
+      font-size: 19px;
+      font-weight: 900;
+      letter-spacing: 0.1em;
+      color: #fbbf24;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8), 0 0 20px rgba(251, 191, 36, 0.4);
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .scene-switcher {
+      display: flex;
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.65);
+      border: 1px solid rgba(217, 119, 6, 0.4);
+      padding: 4px;
+      border-radius: 999px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(12px);
+    }
+
+    .scene-btn {
+      background: transparent;
+      border: none;
+      color: #d6c7b2;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .scene-btn.active {
+      background: linear-gradient(135deg, #d97706, #92400e);
+      color: #fff;
+      box-shadow: 0 2px 10px rgba(217, 119, 6, 0.6);
+    }
+
+    .scene-btn:hover:not(.active) {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    .trio-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .stool-counter {
+      background: rgba(0, 0, 0, 0.65);
+      border: 1px solid rgba(217, 119, 6, 0.35);
+      color: #fbbf24;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 999px;
+      backdrop-filter: blur(10px);
+    }
+
+    .btn-buy-chair {
+      background: linear-gradient(135deg, #d97706, #b45309);
+      color: #000;
+      font-weight: 800;
+      font-size: 12px;
+      border: 1px solid #fbbf24;
+      padding: 6px 16px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: transform 0.2s ease, filter 0.2s ease;
+      box-shadow: 0 2px 14px rgba(217, 119, 6, 0.5);
+    }
+
+    .btn-buy-chair:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.15);
+    }
+
+    .btn-studio {
+      background: rgba(18, 12, 8, 0.85);
+      color: #38bdf8;
+      font-weight: 700;
+      font-size: 12px;
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      padding: 6px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-studio:hover {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: #38bdf8;
+      box-shadow: 0 0 14px rgba(56, 189, 248, 0.3);
+    }
+
+    .btn-feed-mgr {
+      background: rgba(18, 12, 8, 0.85);
+      color: #34d399;
+      font-weight: 700;
+      font-size: 12px;
+      border: 1px solid rgba(52, 211, 153, 0.4);
+      padding: 6px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-feed-mgr:hover {
+      background: rgba(52, 211, 153, 0.15);
+      border-color: #34d399;
+      box-shadow: 0 0 14px rgba(52, 211, 153, 0.3);
+    }
+
+    .btn-blueprints {
+      background: rgba(18, 12, 8, 0.85);
+      color: #fbbf24;
+      font-weight: 700;
+      font-size: 12px;
+      border: 1px solid rgba(251, 191, 36, 0.4);
+      padding: 6px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-blueprints:hover {
+      background: rgba(251, 191, 36, 0.15);
+      border-color: #fbbf24;
+      box-shadow: 0 0 14px rgba(251, 191, 36, 0.3);
+    }
+
+    .btn-tangent {
+      background: rgba(18, 12, 8, 0.85);
+      color: #e879f9;
+      font-weight: 700;
+      font-size: 12px;
+      border: 1px solid rgba(232, 121, 249, 0.4);
+      padding: 6px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-tangent:hover {
+      background: rgba(232, 121, 249, 0.15);
+      border-color: #e879f9;
+      box-shadow: 0 0 14px rgba(232, 121, 249, 0.3);
+    }
+
+    .btn-hearth {
+      background: rgba(18, 12, 8, 0.85);
+      color: #f97316;
+      font-weight: 700;
+      font-size: 12px;
+      border: 1px solid rgba(249, 115, 22, 0.4);
+      padding: 6px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-hearth:hover {
+      background: rgba(249, 115, 22, 0.15);
+      border-color: #f97316;
+      box-shadow: 0 0 14px rgba(249, 115, 22, 0.3);
+    }
+
+    .btn-ammo {
+      background: rgba(18, 12, 8, 0.85);
+      color: #38bdf8;
+      font-weight: 700;
+      font-size: 12px;
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      padding: 6px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-ammo:hover {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: #38bdf8;
+      box-shadow: 0 0 14px rgba(56, 189, 248, 0.3);
+    }
+
+    /* 3D Projected Speech Bubble (Most Recent Activity Only) */
+    .spatial-speech-bubble {
+      position: absolute;
+      z-index: 100;
+      background: rgba(14, 10, 7, 0.95);
+      border: 2px solid #fbbf24;
+      border-radius: 12px;
+      padding: 12px 16px;
+      width: 250px;
+      color: #fef3c7;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.95), 0 0 24px rgba(245, 158, 11, 0.2);
+      backdrop-filter: blur(12px);
+      display: none;
+      transform: translate(-50%, -100%);
+      pointer-events: auto;
+      transition: opacity 0.2s ease;
+    }
+
+    .spatial-speech-bubble::after {
+      content: "";
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 10px 10px 0;
+      border-style: solid;
+      border-color: #fbbf24 transparent;
+      display: block;
+      width: 0;
+    }
+
+    .bubble-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      border-bottom: 1px solid rgba(251, 191, 36, 0.2);
+      padding-bottom: 4px;
+    }
+
+    .bubble-name {
+      font-weight: 700;
+      font-size: 13px;
+      color: #fbbf24;
+    }
+
+    .bubble-meta {
+      font-size: 10px;
+      color: #94a3b8;
+    }
+
+    .bubble-status {
+      font-size: 11px;
+      color: #fde68a;
+      margin-bottom: 4px;
+    }
+
+    .bubble-now-playing {
+      font-size: 11px;
+      color: #38bdf8;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .bubble-movie {
+      font-size: 11px;
+      color: #cbd5e1;
+      font-style: italic;
+      margin-bottom: 10px;
+      line-height: 1.3;
+    }
+
+    .bubble-buttons {
+      display: flex;
+      gap: 6px;
+    }
+
+    .btn-clink {
+      flex: 1;
+      background: #d97706;
+      border: none;
+      color: #000;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 6px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .btn-clink:hover {
+      background: #fbbf24;
+    }
+
+    .btn-roast {
+      flex: 1;
+      background: #dc2626;
+      border: none;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 6px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .btn-roast:hover {
+      background: #ef4444;
+    }
+
+    /* Expandable Corner Ledger (History & Lore) */
+    .ledger-trigger {
+      position: absolute;
+      bottom: 20px;
+      right: 24px;
+      background: rgba(26, 16, 10, 0.92);
+      border: 1px solid rgba(217, 119, 6, 0.5);
+      border-radius: 10px;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #fde68a;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      z-index: 50;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8);
+      transition: all 0.2s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .ledger-trigger:hover {
+      transform: translateY(-2px);
+      border-color: #fbbf24;
+      box-shadow: 0 12px 30px rgba(217, 119, 6, 0.3);
+    }
+
+    .ledger-drawer {
+      position: absolute;
+      bottom: 74px;
+      right: 24px;
+      width: 380px;
+      max-height: 480px;
+      background: rgba(18, 11, 7, 0.96);
+      border: 2px solid #d97706;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.95);
+      z-index: 60;
+      overflow-y: auto;
+      display: none;
+      backdrop-filter: blur(16px);
+    }
+
+    .ledger-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(217, 119, 6, 0.3);
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+      font-family: 'Cinzel', serif;
+      font-size: 14px;
+      color: #fbbf24;
+      font-weight: 700;
+    }
+
+    .ledger-section-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      margin: 12px 0 6px;
+      letter-spacing: 0.05em;
+    }
+
+    .ledger-item {
+      background: rgba(0, 0, 0, 0.3);
+      border-left: 3px solid #d97706;
+      padding: 8px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      margin-bottom: 6px;
+      line-height: 1.4;
+    }
+
+    /* Ambient Prompt Instructions at Bottom Left */
+    .interaction-hints {
+      position: absolute;
+      bottom: 20px;
+      left: 24px;
+      z-index: 50;
+      background: rgba(12, 8, 5, 0.85);
+      border: 1px solid rgba(217, 119, 6, 0.3);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 11px;
+      color: #d6c7b2;
+      backdrop-filter: blur(10px);
+      pointer-events: none;
+    }
+
+    .interaction-hints span {
+      color: #fbbf24;
+      font-weight: 700;
+    }
+
+    /* Modals */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-card {
+      background: #180f08;
+      border: 2px solid #d97706;
+      border-radius: 16px;
+      padding: 24px;
+      width: 480px;
+      max-width: 92vw;
+      max-height: 88vh;
+      overflow-y: auto;
+      color: #fef3c7;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.95);
+    }
+
+    .modal-card h3 {
+      font-family: 'Cinzel', serif;
+      font-size: 18px;
+      color: #fbbf24;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      color: #fbbf24;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+
+    .form-control {
+      width: 100%;
+      background: #0c0805;
+      border: 1px solid rgba(217, 119, 6, 0.4);
+      color: #fff;
+      padding: 9px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-family: inherit;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: #fbbf24;
+      box-shadow: 0 0 10px rgba(251, 191, 36, 0.3);
+    }
+
+    .swatch-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .swatch-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+
+    .swatch-btn.active {
+      transform: scale(1.15);
+      border-color: #fff;
+      box-shadow: 0 0 12px rgba(255, 255, 255, 0.6);
+    }
+
+    .swatch-btn:hover {
+      transform: scale(1.1);
+    }
+
+    #error-banner {
+      display: none;
+      position: fixed;
+      top: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #991b1b;
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 12px;
+      z-index: 999;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Blueprints Master Reader Styles */
+    .blueprints-modal-card {
+      width: 1100px;
+      max-width: 95vw;
+      height: 88vh;
+      background: #120c08;
+      border: 2px solid #d97706;
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.95);
+      color: #fef3c7;
+    }
+
+    .blueprints-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 24px;
+      background: rgba(0, 0, 0, 0.5);
+      border-bottom: 1px solid rgba(217, 119, 6, 0.3);
+    }
+
+    .blueprints-body {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .blueprints-sidebar {
+      width: 280px;
+      background: rgba(8, 5, 3, 0.8);
+      border-right: 1px solid rgba(217, 119, 6, 0.2);
+      padding: 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .artifact-tab-btn {
+      text-align: left;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(217, 119, 6, 0.2);
+      color: #d6c7b2;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .artifact-tab-btn.active {
+      background: linear-gradient(135deg, rgba(217, 119, 6, 0.35), rgba(146, 64, 14, 0.45));
+      border-color: #fbbf24;
+      color: #fff;
+      box-shadow: 0 2px 10px rgba(217, 119, 6, 0.3);
+    }
+
+    .artifact-tab-btn:hover:not(.active) {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+    }
+
+    .blueprints-content {
+      flex: 1;
+      padding: 28px 36px;
+      overflow-y: auto;
+      background: #170f0a;
+      line-height: 1.65;
+    }
+
+    .markdown-reader h1 {
+      font-family: 'Cinzel', serif;
+      font-size: 24px;
+      color: #fbbf24;
+      border-bottom: 2px solid rgba(217, 119, 6, 0.4);
+      padding-bottom: 8px;
+      margin-bottom: 16px;
+    }
+
+    .markdown-reader h2 {
+      font-family: 'Cinzel', serif;
+      font-size: 18px;
+      color: #fde68a;
+      margin: 22px 0 10px;
+      border-bottom: 1px solid rgba(217, 119, 6, 0.2);
+      padding-bottom: 6px;
+    }
+
+    .markdown-reader h3 {
+      font-size: 14px;
+      color: #f59e0b;
+      margin: 16px 0 8px;
+      font-weight: 700;
+    }
+
+    .markdown-reader p {
+      margin-bottom: 12px;
+      font-size: 13px;
+      color: #e2e8f0;
+    }
+
+    .markdown-reader ul, .markdown-reader ol {
+      margin: 10px 0 14px 24px;
+      font-size: 13px;
+      color: #cbd5e1;
+    }
+
+    .markdown-reader li {
+      margin-bottom: 6px;
+    }
+
+    .markdown-reader pre {
+      background: #090604;
+      border: 1px solid rgba(217, 119, 6, 0.3);
+      border-radius: 8px;
+      padding: 14px;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: #38bdf8;
+      margin: 14px 0;
+    }
+
+    .markdown-reader code {
+      background: rgba(0, 0, 0, 0.4);
+      color: #f43f5e;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+    }
+
+    .markdown-reader blockquote {
+      border-left: 4px solid #fbbf24;
+      background: rgba(251, 191, 36, 0.08);
+      padding: 10px 16px;
+      border-radius: 0 8px 8px 0;
+      margin: 14px 0;
+      font-style: italic;
+      color: #fef3c7;
+    }
+
+    .md-alert {
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin: 12px 0;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .md-alert-note { background: rgba(56, 189, 248, 0.12); border-left: 4px solid #38bdf8; color: #bae6fd; }
+    .md-alert-tip { background: rgba(52, 211, 153, 0.12); border-left: 4px solid #34d399; color: #a7f3d0; }
+    .md-alert-important { background: rgba(168, 85, 247, 0.12); border-left: 4px solid #a855f7; color: #e9d5ff; }
+    .md-alert-warning { background: rgba(245, 158, 11, 0.12); border-left: 4px solid #f59e0b; color: #fde68a; }
+    .md-alert-caution { background: rgba(239, 68, 68, 0.12); border-left: 4px solid #ef4444; color: #fecaca; }
+
+    /* Tangent Cards */
+    .tangent-card {
+      background: rgba(0, 0, 0, 0.45);
+      border-left: 4px solid #e879f9;
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      border-right: 1px solid rgba(255, 255, 255, 0.05);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .tangent-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 999px;
+      margin-bottom: 6px;
+    }
+    .tangent-badge.unfinished_debate { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
+    .tangent-badge.unresolved_decision { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+    .tangent-badge.deep_rabbit_hole { background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.4); }
+    .tangent-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+    .tangent-summary {
+      font-size: 11px;
+      color: #cbd5e1;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+    .tangent-quotes {
+      background: rgba(0, 0, 0, 0.5);
+      border-left: 2px solid #a855f7;
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      color: #94a3b8;
+      font-style: italic;
+      margin-bottom: 8px;
+    }
+    .tangent-starter-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: rgba(232, 121, 249, 0.1);
+      border: 1px dashed rgba(232, 121, 249, 0.4);
+      border-radius: 6px;
+      padding: 6px 10px;
+    }
+    .starter-text {
+      font-size: 11px;
+      color: #f5d0fe;
+      font-weight: 500;
+    }
+    .btn-copy-starter {
+      background: #a855f7;
+      color: #fff;
+      border: none;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-copy-starter:hover {
+      background: #9333ea;
+    }
+
+    /* Custom Den Studio Styles */
+    .studio-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid rgba(217, 119, 6, 0.3);
+      padding-bottom: 10px;
+    }
+    .studio-tab-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(217, 119, 6, 0.3);
+      color: #cbd5e1;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .studio-tab-btn.active {
+      background: linear-gradient(135deg, #ec4899, #be185d);
+      color: #fff;
+      border-color: #f472b6;
+      box-shadow: 0 0 12px rgba(236, 72, 153, 0.4);
+    }
+    .studio-dropzone {
+      border: 2px dashed rgba(236, 72, 153, 0.45);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      background: rgba(236, 72, 153, 0.04);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .studio-dropzone:hover, .studio-dropzone.dragover {
+      border-color: #f472b6;
+      background: rgba(236, 72, 153, 0.12);
+    }
+    .pill-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fde68a;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .pill-btn:hover {
+      background: rgba(217, 119, 6, 0.3);
+      border-color: #fbbf24;
+      color: #fff;
+    }
+    .palette-chip {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    }
+    .layout-card {
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(217, 119, 6, 0.25);
+      border-radius: 10px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .layout-card:hover {
+      transform: translateY(-2px);
+      border-color: #f472b6;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+    }
+    .layout-card.active {
+      border: 2px solid #f472b6;
+      background: rgba(236, 72, 153, 0.1);
+    }
+  </style>
+</head>
+<body>
+
+  <div id="error-banner"></div>
+
+  <!-- 3D Canvas -->
+  <canvas id="webgl-canvas"></canvas>
+
+  <!-- Top Navigation -->
+  <div class="top-bar">
+    <div class="brand-title">
+      <span style="font-size: 22px;">🛋️</span>
+      <h1 id="roomTitle">THE VELVET SPEAKEASY</h1>
+    </div>
+
+    <!-- The 4 Handcrafted Spatial Rooms -->
+    <div class="scene-switcher">
+      <button class="scene-btn active" onclick="selectRoom('bar', this)">🥃 Speakeasy Bar</button>
+      <button class="scene-btn" onclick="selectRoom('booth', this)">🛋️ Corner Booth</button>
+      <button class="scene-btn" onclick="selectRoom('poker', this)">♠️ Poker Den</button>
+      <button class="scene-btn" onclick="selectRoom('library', this)">📚 Hearth Library</button>
+      <button class="scene-btn" id="btnCustomDen" onclick="openLayoutStudioModal()" style="border-color: #ec4899; color: #f472b6;">🎨 Custom Den Studio</button>
+    </div>
+
+    <!-- Avatar & Feed Studio Controls -->
+    <div class="nav-actions">
+      <button class="btn-hearth" id="btnHearthNav" onclick="openHearthModal()">🪵 Hearth (Focus)</button>
+      <button class="btn-ammo" onclick="openSparringModal()">⚔️ Sparring Ammo</button>
+      <button class="btn-blueprints" onclick="openBlueprintsModal()">📜 Blueprints</button>
+      <button class="btn-tangent" onclick="openTangentModal()">🗺️ Tangents</button>
+      <button class="btn-studio" onclick="openAvatarModal()">🎨 Avatar Studio</button>
+      <button class="btn-feed-mgr" onclick="openFeedModal()">📡 Exhaust Pipes</button>
+      <div class="stool-counter" id="stoolCountBadge">4 / 15 Stools Filled</div>
+      <button class="btn-buy-chair" onclick="openChairModal()">+ Extra Chair ($3.99)</button>
+    </div>
+  </div>
+
+  <!-- Bottom Left Interaction Guidance -->
+  <div class="interaction-hints">
+    Click <span>Avatars</span> to interact • Click <span>Jukebox</span> for vinyls • Click <span>Journal</span> for tangents • Click <span>Dice</span> for slow game
+  </div>
+
+  <!-- 3D Projected Speech Bubble (Most Recent Activity Only) -->
+  <div class="spatial-speech-bubble" id="avatarBubble">
+    <div class="bubble-header">
+      <span class="bubble-name" id="bName">Dave</span>
+      <span class="bubble-meta" id="bMeta">London • BST</span>
+    </div>
+    <div class="bubble-status" id="bStatus">Refactoring the payment gateway in the rain 🌧️</div>
+    <div class="bubble-now-playing" id="bMusic">🎵 Radiohead — Karma Police</div>
+    <div class="bubble-movie" id="bMovie">🎬 Dune 2 (2.5★): "Sand was too loud"</div>
+    <div id="bResidue" style="display: none;"></div>
+    <div class="bubble-buttons">
+      <button class="btn-clink" onclick="clinkGlass()">🍻 Clink / Ember</button>
+      <button class="btn-roast" onclick="roastFriend()">⚡ Roast</button>
+      <button class="btn-roast" style="background: rgba(245, 158, 11, 0.2); border-color: #fbbf24; color: #fbbf24;" onclick="stageAmmoForActiveUser()">⚔️ Spar</button>
+    </div>
+  </div>
+
+  <!-- Expandable Ledger Trigger & Drawer -->
+  <div class="ledger-trigger" onclick="toggleLedger()">
+    <span>📖</span>
+    <span>Den Ledger</span>
+  </div>
+
+  <div class="ledger-drawer" id="ledgerDrawer">
+    <div class="ledger-header">
+      <span>The Den Chronicle</span>
+      <span style="cursor: pointer; font-size: 16px;" onclick="toggleLedger()">✕</span>
+    </div>
+
+    <div class="ledger-section-title">Consecrated Inside Jokes (2-Party Consent)</div>
+    <div id="ledgerJokesList"></div>
+
+    <div class="ledger-section-title">Recent Cinema Logs (Letterboxd)</div>
+    <div id="ledgerMoviesList"></div>
+
+    <div class="ledger-section-title">Recent Focus Commits (GitHub)</div>
+    <div id="ledgerCommitsList"></div>
+  </div>
+
+  <!-- 1. Avatar Customization Studio Modal -->
+  <div class="modal-overlay" id="avatarModal">
+    <div class="modal-card">
+      <h3>🎨 Avatar Studio</h3>
+      <p style="font-size: 11px; color: #d6c7b2; margin-bottom: 16px; line-height: 1.4;">
+        Handcraft your 3D physical presence at the table. Your avatar breathes, holds their signature drink, and reflects your personality in the room.
+      </p>
+
+      <div class="form-group">
+        <label class="form-label">Select Friend to Customize</label>
+        <select id="avUserSelect" class="form-control" onchange="loadUserAvatarConfig()">
+          <option value="badri">Badri (You)</option>
+          <option value="dave">Dave</option>
+          <option value="priya">Priya</option>
+          <option value="sam">Sam</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Sweater / Outfit Color</label>
+        <div class="swatch-grid" id="outfitSwatches">
+          <button class="swatch-btn" style="background: #38bdf8;" onclick="selectOutfitColor('#38bdf8', this)"></button>
+          <button class="swatch-btn" style="background: #10b981;" onclick="selectOutfitColor('#10b981', this)"></button>
+          <button class="swatch-btn" style="background: #f43f5e;" onclick="selectOutfitColor('#f43f5e', this)"></button>
+          <button class="swatch-btn" style="background: #a855f7;" onclick="selectOutfitColor('#a855f7', this)"></button>
+          <button class="swatch-btn" style="background: #d97706;" onclick="selectOutfitColor('#d97706', this)"></button>
+          <button class="swatch-btn" style="background: #1e293b;" onclick="selectOutfitColor('#1e293b', this)"></button>
+          <button class="swatch-btn" style="background: #991b1b;" onclick="selectOutfitColor('#991b1b', this)"></button>
+          <button class="swatch-btn" style="background: #065f46;" onclick="selectOutfitColor('#065f46', this)"></button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Skin Tone</label>
+        <div class="swatch-grid" id="skinSwatches">
+          <button class="swatch-btn" style="background: #fbcfe8;" onclick="selectSkinTone('#fbcfe8', this)"></button>
+          <button class="swatch-btn" style="background: #fde047;" onclick="selectSkinTone('#fde047', this)"></button>
+          <button class="swatch-btn" style="background: #f59e0b;" onclick="selectSkinTone('#f59e0b', this)"></button>
+          <button class="swatch-btn" style="background: #b45309;" onclick="selectSkinTone('#b45309', this)"></button>
+          <button class="swatch-btn" style="background: #78350f;" onclick="selectSkinTone('#78350f', this)"></button>
+          <button class="swatch-btn" style="background: #451a03;" onclick="selectSkinTone('#451a03', this)"></button>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div class="form-group">
+          <label class="form-label">Headwear / Hair Style</label>
+          <select id="avHairStyle" class="form-control">
+            <option value="beanie">Warm Beanie</option>
+            <option value="cap">Baseball Cap</option>
+            <option value="curly">Curly Locks</option>
+            <option value="sleek">Sleek Hair</option>
+            <option value="messy">Messy Crop</option>
+            <option value="bald">Clean / Bald</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Hair / Hat Color</label>
+          <select id="avHairColor" class="form-control">
+            <option value="#1c1917">Midnight Black</option>
+            <option value="#78350f">Warm Chestnut</option>
+            <option value="#d97706">Honey Blonde</option>
+            <option value="#475569">Slate Silver</option>
+            <option value="#991b1b">Crimson Dye</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div class="form-group">
+          <label class="form-label">Signature Drink</label>
+          <select id="avDrink" class="form-control">
+            <option value="coffee">☕ Pour-over Coffee</option>
+            <option value="beer">🍺 Craft Stout Pint</option>
+            <option value="cocktail">🍸 Coupe Cocktail</option>
+            <option value="tea">🍵 Matcha Bowl</option>
+            <option value="boba">🧋 Boba Milk Tea</option>
+            <option value="scotch">🥃 Islay Single Malt</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Accessory</label>
+          <select id="avAccessory" class="form-control">
+            <option value="none">None</option>
+            <option value="glasses">👓 Wireframe Glasses</option>
+            <option value="headphones">🎧 Studio Headphones</option>
+            <option value="scarf">🧣 Knitted Scarf</option>
+            <option value="camera">📷 Vintage Camera</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px;">
+        <button class="scene-btn" onclick="closeAvatarModal()">Cancel</button>
+        <button class="btn-buy-chair" onclick="saveAvatarConfig()">Save Avatar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Ambient Exhaust Feed Manager Modal -->
+  <div class="modal-overlay" id="feedModal">
+    <div class="modal-card">
+      <h3>📡 Ambient Exhaust Pipes</h3>
+      <p style="font-size: 11px; color: #d6c7b2; margin-bottom: 16px; line-height: 1.4;">
+        Connect your passive digital exhaust without manual posting chores. Feeds update speech bubbles, the wall Jukebox, and the slate in real time.
+      </p>
+
+      <div class="form-group">
+        <label class="form-label">Feed Owner</label>
+        <select id="feedUserSelect" class="form-control" onchange="loadUserFeedConfig()">
+          <option value="badri">Badri (You)</option>
+          <option value="dave">Dave</option>
+          <option value="priya">Priya</option>
+          <option value="sam">Sam</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Current Status / Deep Focus</label>
+        <input type="text" id="feedStatus" class="form-control" placeholder="e.g. Deep in agentic architectures ☕" />
+      </div>
+
+      <div style="border-top: 1px solid rgba(217, 119, 6, 0.2); padding-top: 12px; margin-top: 12px;">
+        <label class="form-label">🎵 Spotify Stream</label>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <input type="text" id="feedSong" class="form-control" placeholder="Track Name" />
+          <input type="text" id="feedArtist" class="form-control" placeholder="Artist" />
+        </div>
+        <div style="margin-top: 6px; font-size: 11px; display: flex; align-items: center; gap: 6px;">
+          <input type="checkbox" id="feedPlaying" checked />
+          <label for="feedPlaying" style="color: #34d399;">Currently Playing Stream</label>
+        </div>
+      </div>
+
+      <div style="border-top: 1px solid rgba(217, 119, 6, 0.2); padding-top: 12px; margin-top: 12px;">
+        <label class="form-label">🎬 Letterboxd Film Exhaust</label>
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px; margin-bottom: 6px;">
+          <input type="text" id="feedMovieTitle" class="form-control" placeholder="Film Title" />
+          <select id="feedMovieRating" class="form-control">
+            <option value="5.0">5.0 ★★★★★</option>
+            <option value="4.5">4.5 ★★★★½</option>
+            <option value="4.0">4.0 ★★★★</option>
+            <option value="3.5">3.5 ★★★½</option>
+            <option value="3.0">3.0 ★★★</option>
+            <option value="2.5">2.5 ★★½</option>
+            <option value="2.0">2.0 ★★</option>
+          </select>
+        </div>
+        <input type="text" id="feedMovieReview" class="form-control" placeholder="Short review punchline" />
+      </div>
+
+      <div style="border-top: 1px solid rgba(217, 119, 6, 0.2); padding-top: 12px; margin-top: 12px;">
+        <label class="form-label">💻 GitHub Focus Stream</label>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <input type="text" id="feedGitRepo" class="form-control" placeholder="repo (e.g. badri/den-spatial)" />
+          <input type="text" id="feedGitCommit" class="form-control" placeholder="latest commit message" />
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px;">
+        <button class="scene-btn" onclick="closeFeedModal()">Cancel</button>
+        <button class="btn-buy-chair" onclick="saveFeedConfig()">Broadcast Feed</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Extra Chair Purchase Modal -->
+  <div class="modal-overlay" id="chairModal">
+    <div class="modal-card">
+      <h3>Pull Up an Extra Chair ($3.99)</h3>
+      <p style="font-size: 12px; color: #d6c7b2; line-height: 1.5; margin-bottom: 16px;">
+        The Den gives your core Trio <strong>3 free chairs forever</strong>. Adding an extra chair is a one-time <strong>$3.99 purchase</strong>. You are buying a physical seat for your buddy, eliminating spam and protecting the sacred Dunbar boundary (max 15).
+      </p>
+      <input type="text" id="newFriendName" placeholder="Friend Name (e.g. Marcus)" class="form-control" style="margin-bottom: 10px;" />
+      <input type="text" id="newFriendHandle" placeholder="Handle (e.g. @marcus_ny)" class="form-control" style="margin-bottom: 16px;" />
+      <div style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button class="scene-btn" onclick="closeChairModal()">Cancel</button>
+        <button class="btn-buy-chair" onclick="confirmChairPurchase()">Unlock Seat ($3.99)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Jukebox Track Picker Modal -->
+  <div class="modal-overlay" id="jukeboxModal">
+    <div class="modal-card">
+      <h3>Speakeasy Jukebox • Active Vinyls</h3>
+      <div id="jukeboxTracks" style="display: flex; flex-direction: column; gap: 8px;"></div>
+      <div style="margin-top: 16px; text-align: right;">
+        <button class="scene-btn" onclick="closeJukeboxModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Blueprints & Strategic Artifacts Reader Modal -->
+  <div class="modal-overlay" id="blueprintsModal">
+    <div class="blueprints-modal-card">
+      <div class="blueprints-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 20px;">📜</span>
+          <h3 style="margin: 0; font-family: 'Cinzel', serif; color: #fbbf24; font-size: 17px;">The Den Master Blueprints & Strategy Repository</h3>
+        </div>
+        <button class="scene-btn" onclick="closeBlueprintsModal()">✕ Close Reader</button>
+      </div>
+      <div class="blueprints-body">
+        <div class="blueprints-sidebar" id="artifactsSidebar">
+          <!-- Artifact tabs dynamically injected here -->
+        </div>
+        <div class="blueprints-content" id="artifactContent">
+          <div style="text-align: center; color: #94a3b8; margin-top: 100px;">
+            <div style="font-size: 36px; margin-bottom: 12px;">📖</div>
+            <p>Select a blueprint document from the left to read.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Tangent Cartographer & Thread Import Modal -->
+  <div class="modal-overlay" id="tangentModal">
+    <div class="modal-card" style="width: 680px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h3 style="margin: 0;">🗺️ Tangent Cartographer</h3>
+        <span style="font-size: 11px; background: rgba(232, 121, 249, 0.2); color: #e879f9; padding: 3px 8px; border-radius: 999px; border: 1px solid rgba(232, 121, 249, 0.4);">Whisper Nook Continuity</span>
+      </div>
+      <p style="font-size: 11px; color: #d6c7b2; margin-bottom: 16px; line-height: 1.4;">
+        Pick up where you left off with zero awkward small talk. Paste a raw chat thread, WhatsApp export, or voice note transcript. AI extracts open debates, life crossroads, and rabbit holes as conversation starters.
+      </p>
+
+      <div style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(217, 119, 6, 0.3); border-radius: 10px; padding: 14px; margin-bottom: 16px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+          <div>
+            <label class="form-label">Friend / Partner</label>
+            <select id="importPartnerSelect" class="form-control">
+              <option value="dave">Dave (@dave_london)</option>
+              <option value="priya">Priya (@priya_sf)</option>
+              <option value="sam">Sam (@sam_berlin)</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label">Source Format</label>
+            <select id="importSourceSelect" class="form-control">
+              <option value="WhatsApp Export">WhatsApp Chat Export</option>
+              <option value="Signal Transcript">Signal Encrypted Thread</option>
+              <option value="Telegram DM">Telegram DM</option>
+              <option value="Voice Note Transcription">Voice Note Transcription</option>
+            </select>
+          </div>
+        </div>
+        <label class="form-label">Paste Raw Chat Snippet / Recording Transcript</label>
+        <textarea id="importSnippetText" class="form-control" rows="4" placeholder="e.g.
+Dave: I still think monorepos are a disaster for small teams.
+Badri: Microservices give you network boundary isolation, Dave!
+Dave: At what operational overhead though? Let's discuss later."></textarea>
+        <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
+          <button class="btn-buy-chair" style="background: linear-gradient(135deg, #a855f7, #7c3aed); border-color: #c084fc; color: #fff;" onclick="submitThreadImport()">📥 Extract & Map Tangents</button>
+        </div>
+      </div>
+
+      <div class="form-label" style="display: flex; justify-content: space-between; align-items: center;">
+        <span>Active Tangent Ledger</span>
+        <span id="tangentCountBadge" style="color: #94a3b8; font-size: 10px;">3 active threads</span>
+      </div>
+      <div id="tangentsListContainer" style="display: flex; flex-direction: column; gap: 10px; max-height: 280px; overflow-y: auto;">
+        <!-- Tangent cards rendered here -->
+      </div>
+
+      <div style="margin-top: 16px; text-align: right;">
+        <button class="scene-btn" onclick="closeTangentModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. The Sovereign Acoustic Hearth Focus Modal -->
+  <div class="modal-overlay" id="hearthModal">
+    <div class="modal-card" style="width: 580px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h3 style="margin: 0; color: #f97316;">🪵 The Sovereign Acoustic Hearth</h3>
+        <span style="font-size: 11px; background: rgba(249, 115, 22, 0.2); color: #fb923c; padding: 3px 8px; border-radius: 999px; border: 1px solid rgba(249, 115, 22, 0.4);">Organic Focus Sanctum</span>
+      </div>
+      <p style="font-size: 11px; color: #d6c7b2; margin-bottom: 16px; line-height: 1.4;">
+        A quiet, solitary focus sanctuary with zero gamified chore-points and zero artificial AI chatter. Drag a birch log to the hearth to fuel a 45-minute deep focus burn. When the fire burns down to embers, rest.
+      </p>
+
+      <!-- Fireplace Status Visualizer -->
+      <div style="background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(249, 115, 22, 0.4); border-radius: 12px; padding: 16px; margin-bottom: 16px; text-align: center;">
+        <div style="font-size: 40px; margin-bottom: 6px;" id="hearthFlameIcon">🔥</div>
+        <div style="font-size: 16px; font-weight: 700; color: #fbbf24; font-family: 'Cinzel', serif;" id="hearthTimeRemaining">Focus Burn: 45m Active</div>
+        <div style="font-size: 11px; color: #94a3b8; margin-top: 4px;" id="hearthLogsBurned">1 log on the fire (Birch) • Ambient flame intensity 85%</div>
+        <div style="display: flex; justify-content: center; gap: 8px; margin-top: 14px;">
+          <button class="scene-btn" style="border-color: #f97316; color: #fed7aa;" onclick="feedHearth(45)">🪵 Feed Birch Log (+45m)</button>
+          <button class="scene-btn" style="border-color: #f59e0b; color: #fde68a;" onclick="feedHearth(20)">🪵 Feed Kindling (+20m)</button>
+          <button class="scene-btn" style="border-color: #ea580c; color: #ffedd5;" onclick="feedHearth(60)">🪵 Feed Oak Log (+60m)</button>
+        </div>
+      </div>
+
+      <!-- Procedural Web Audio Ambient Controls -->
+      <div style="background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(217, 119, 6, 0.25); border-radius: 10px; padding: 14px; margin-bottom: 16px;">
+        <div class="form-label" style="margin-bottom: 10px;">Procedural Acoustic Soundscape (Zero External Audio)</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div style="background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between;">
+            <div>
+              <div style="font-size: 12px; font-weight: 700; color: #38bdf8;">🌧️ Rain on Glass</div>
+              <div style="font-size: 10px; color: #94a3b8;">Analog bandpass filter</div>
+            </div>
+            <button class="scene-btn" id="btnToggleRain" onclick="toggleRainAmbience()" style="font-size: 11px; padding: 4px 10px;">Toggle</button>
+          </div>
+          <div style="background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between;">
+            <div>
+              <div style="font-size: 12px; font-weight: 700; color: #f97316;">🔥 Cedar Fire Crackle</div>
+              <div style="font-size: 10px; color: #94a3b8;">Random impulse micro-pops</div>
+            </div>
+            <button class="scene-btn" id="btnToggleFire" onclick="toggleFireAmbience()" style="font-size: 11px; padding: 4px 10px;">Toggle</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="text-align: right;">
+        <button class="scene-btn" onclick="closeHearthModal()">Back to Room</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. The Tangent Crucible: Sparring Ammo Staging Modal -->
+  <div class="modal-overlay" id="sparringModal">
+    <div class="modal-card" style="width: 650px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h3 style="margin: 0; color: #38bdf8;">⚔️ The Tangent Crucible • Sparring Ammo</h3>
+        <span style="font-size: 11px; background: rgba(56, 189, 248, 0.2); color: #7dd3fc; padding: 3px 8px; border-radius: 999px; border: 1px solid rgba(56, 189, 248, 0.4);">Asynchronous Coaster Challenge</span>
+      </div>
+      <p style="font-size: 11px; color: #d6c7b2; margin-bottom: 16px; line-height: 1.4;">
+        Turn solitary reading, podcast rabbit-holes, and papers into intellectual ammunition pinned directly onto a friend's drink coaster. Eliminates the awkward <em>"Hey what's up"</em> friction when they walk in.
+      </p>
+
+      <div style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 10px; padding: 14px; margin-bottom: 16px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+          <div>
+            <label class="form-label">Target Friend's Coaster</label>
+            <select id="sparringTargetUser" class="form-control">
+              <option value="dave">Dave (@dave_london) — Glencairn Coaster</option>
+              <option value="priya">Priya (@priya_sf) — Matcha Coaster</option>
+              <option value="sam">Sam (@sam_berlin) — Pint Coaster</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label">Debate Topic / Proposition</label>
+            <input type="text" id="sparringTopic" class="form-control" placeholder="e.g. SQLite WAL vs RocksDB" />
+          </div>
+        </div>
+
+        <label class="form-label">Your Hot Take / Argument</label>
+        <textarea id="sparringArgument" class="form-control" rows="2" placeholder="e.g. Read amplification on RocksDB isn't worth the write throughput gain for our dataset size." style="margin-bottom: 10px;"></textarea>
+
+        <label class="form-label">Citation / Proof Link (Paper, GitHub PR, Blog)</label>
+        <input type="text" id="sparringCitation" class="form-control" placeholder="https://sqlite.org/wal.html" style="margin-bottom: 12px;" />
+
+        <div style="text-align: right;">
+          <button class="btn-buy-chair" style="background: linear-gradient(135deg, #0284c7, #0369a1); border-color: #38bdf8;" onclick="submitSparringChallenge()">📌 Pin Challenge to Friend's Coaster</button>
+        </div>
+      </div>
+
+      <div class="form-label" style="display: flex; justify-content: space-between; align-items: center;">
+        <span>Staged Coaster Challenges (Ready for Reunion)</span>
+        <span id="stagedChallengesBadge" style="color: #94a3b8; font-size: 10px;">1 staged</span>
+      </div>
+      <div id="stagedChallengesList" style="display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto;">
+        <!-- Staged challenges rendered here -->
+      </div>
+
+      <div style="margin-top: 16px; text-align: right;">
+        <button class="scene-btn" onclick="closeSparringModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9. Custom Den Studio: Procedural Spatial Architect -->
+  <div class="modal-overlay" id="layoutStudioModal">
+    <div class="modal-card" style="width: 780px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h3 style="margin: 0; color: #f472b6;">🎨 Custom Den Studio • Familiar Den Architect</h3>
+        <span style="font-size: 11px; background: rgba(236, 72, 153, 0.2); color: #f472b6; padding: 3px 8px; border-radius: 999px; border: 1px solid rgba(236, 72, 153, 0.4);">Procedural 3D Compiler</span>
+      </div>
+      <p style="font-size: 11px; color: #d6c7b2; margin-bottom: 16px; line-height: 1.4;">
+        Build an authentic, familiar sanctuary — your college garage band rehearsal, a rain-soaked botanical greenhouse, a sunset rooftop porch, or your real apartment. Synthesize spatial architecture, harmonic palettes, tactile props, and soundscapes from text prompts or real photos.
+      </p>
+
+      <!-- Tabs Navigation -->
+      <div class="studio-tabs">
+        <button class="studio-tab-btn active" id="tabBtnPrompt" onclick="switchStudioTab('prompt')">✨ Prompt-to-Den</button>
+        <button class="studio-tab-btn" id="tabBtnPhoto" onclick="switchStudioTab('photo')">📷 Photo-to-Den</button>
+        <button class="studio-tab-btn" id="tabBtnGallery" onclick="switchStudioTab('gallery')">🏛️ Saved Dens Gallery (<span id="savedDensCount">3</span>)</button>
+      </div>
+
+      <!-- Tab 1: Prompt-to-Den -->
+      <div id="studioTabPrompt">
+        <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(217, 119, 6, 0.3); border-radius: 10px; padding: 16px; margin-bottom: 14px;">
+          <label class="form-label">Describe the Vibe & Familiar Spatial Memory</label>
+          <textarea id="promptLayoutInput" class="form-control" rows="3" placeholder="e.g. 90s grunge garage band rehearsal space with guitar amps, leather sofa, concrete floor, and string lights"></textarea>
+          
+          <div style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">
+            <span style="font-size: 11px; color: #94a3b8;">Inspirations:</span>
+            <button class="pill-btn" onclick="populatePrompt('90s grunge garage band rehearsal space with guitar amps, leather sofa, and string lights')">🎸 90s Grunge Garage</button>
+            <button class="pill-btn" onclick="populatePrompt('Rainy botanical greenhouse sanctuary with potted monsteras, slate floor, and glass ceiling')">🌿 Rainy Greenhouse</button>
+            <button class="pill-btn" onclick="populatePrompt('Rooftop sunset porch with string fairy lights, cedar decking, and twilight city skyline')">🌆 Sunset Rooftop Porch</button>
+            <button class="pill-btn" onclick="populatePrompt('Tokyo neon alleyway izakaya nook with glowing red paper lanterns and tatami mats')">🏮 Tokyo Neon Izakaya</button>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; margin-top: 14px;">
+            <button class="btn-buy-chair" id="btnSynthesizePrompt" style="background: linear-gradient(135deg, #ec4899, #be185d); border-color: #f472b6;" onclick="synthesizeFromPrompt()">✨ Synthesize 3D Den</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2: Photo-to-Den -->
+      <div id="studioTabPhoto" style="display: none;">
+        <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(217, 119, 6, 0.3); border-radius: 10px; padding: 16px; margin-bottom: 14px;">
+          <div class="studio-dropzone" id="photoDropzone" onclick="document.getElementById('photoFileInput').click()">
+            <input type="file" id="photoFileInput" accept="image/png, image/jpeg, image/jpg" style="display: none;" onchange="handlePhotoSelected(this.files[0])" />
+            <div id="dropzoneContent">
+              <div style="font-size: 32px; margin-bottom: 6px;">📷</div>
+              <div style="font-size: 13px; font-weight: 600; color: #f472b6;">Click or drag & drop a photo of your familiar space</div>
+              <div style="font-size: 10px; color: #94a3b8; margin-top: 4px;">PNG, JPG, or JPEG up to 10MB • Color palette & architectural materials will be extracted</div>
+            </div>
+            <img id="photoPreviewImg" style="display: none; max-height: 180px; margin: 0 auto; border-radius: 8px; border: 1px solid rgba(244, 114, 182, 0.5); object-fit: contain;" />
+          </div>
+
+          <div style="margin-top: 12px;">
+            <label class="form-label">Contextual Memory Hint (Optional)</label>
+            <input type="text" id="photoHintInput" class="form-control" placeholder="e.g. My college apartment living room with the worn rug and amp" />
+          </div>
+
+          <div id="photoPaletteRow" style="display: none; margin-top: 12px; align-items: center; gap: 8px;">
+            <span style="font-size: 11px; color: #94a3b8;">Extracted Palette:</span>
+            <div id="photoPaletteChips" style="display: flex; gap: 6px;"></div>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; margin-top: 14px;">
+            <button class="btn-buy-chair" id="btnSynthesizePhoto" style="background: linear-gradient(135deg, #ec4899, #be185d); border-color: #f472b6;" onclick="synthesizeFromPhoto()">📷 Synthesize 3D Den from Photo</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 3: Saved Dens Gallery -->
+      <div id="studioTabGallery" style="display: none;">
+        <div id="savedDensGrid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-height: 380px; overflow-y: auto; padding-right: 4px;">
+          <!-- Custom layout cards populated dynamically -->
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px;">
+        <div id="studioStatusMsg" style="font-size: 11px; color: #f472b6; font-style: italic;"></div>
+        <button class="scene-btn" onclick="closeLayoutStudioModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Web Audio Synthesizer (Zero External Audio Dependencies) -->
+  <script>
+    class SoundEngine {
+      constructor() {
+        this.ctx = null;
+      }
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+        }
+      }
+      playGlassClink() {
+        this.init();
+        const now = this.ctx.currentTime;
+        const osc1 = this.ctx.createOscillator();
+        const osc2 = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc1.type = "sine";
+        osc1.frequency.setValueAtTime(2400, now);
+        osc1.frequency.exponentialRampToValueAtTime(1800, now + 0.8);
+
+        osc2.type = "sine";
+        osc2.frequency.setValueAtTime(3600, now);
+        osc2.frequency.exponentialRampToValueAtTime(2800, now + 0.6);
+
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+
+        osc1.connect(gain);
+        osc2.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        osc1.start(now);
+        osc2.start(now);
+        osc1.stop(now + 0.8);
+        osc2.stop(now + 0.8);
+      }
+      playDiceRoll() {
+        this.init();
+        const now = this.ctx.currentTime;
+        for (let i = 0; i < 4; i++) {
+          const t = now + i * 0.08 + Math.random() * 0.04;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = "triangle";
+          osc.frequency.setValueAtTime(140 + Math.random() * 80, t);
+          osc.frequency.exponentialRampToValueAtTime(40, t + 0.06);
+
+          gain.gain.setValueAtTime(0.2, t);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.06);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(t);
+          osc.stop(t + 0.06);
+        }
+      }
+      playNeedleDrop() {
+        this.init();
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = "sawtooth";
+        osc.frequency.setValueAtTime(60, now);
+        osc.frequency.linearRampToValueAtTime(120, now + 0.15);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.25);
+      }
+      playDogWhimper() {
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(600, now);
+        osc.frequency.linearRampToValueAtTime(800, now + 0.15);
+        osc.frequency.linearRampToValueAtTime(500, now + 0.35);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.35);
+      }
+      playWoodThud() {
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(110, now);
+        osc.frequency.exponentialRampToValueAtTime(32, now + 0.28);
+        gain.gain.setValueAtTime(0.4, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.28);
+      }
+      toggleRain(forceState) {
+        this.init();
+        if (!this.ctx) return false;
+        if (typeof forceState === 'boolean') {
+          this.isRainPlaying = !forceState;
+        }
+        if (this.isRainPlaying) {
+          if (this.rainGain) {
+            this.rainGain.gain.setValueAtTime(0.0, this.ctx.currentTime);
+          }
+          this.isRainPlaying = false;
+          return false;
+        } else {
+          if (this.ctx.createBuffer) {
+            const bufferSize = this.ctx.sampleRate * 2;
+            const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+            const output = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+              output[i] = (Math.random() * 2 - 1) * 0.15;
+            }
+            const whiteNoise = this.ctx.createBufferSource();
+            whiteNoise.buffer = buffer;
+            whiteNoise.loop = true;
+
+            const filter = this.ctx.createBiquadFilter ? this.ctx.createBiquadFilter() : null;
+            if (filter) {
+              filter.type = "bandpass";
+              filter.frequency.setValueAtTime(1000, this.ctx.currentTime);
+              filter.Q.setValueAtTime(1.2, this.ctx.currentTime);
+            }
+
+            this.rainGain = this.ctx.createGain();
+            this.rainGain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+
+            if (filter) {
+              whiteNoise.connect(filter);
+              filter.connect(this.rainGain);
+            } else {
+              whiteNoise.connect(this.rainGain);
+            }
+            this.rainGain.connect(this.ctx.destination);
+            whiteNoise.start(0);
+            this.rainSource = whiteNoise;
+          }
+          this.isRainPlaying = true;
+          return true;
+        }
+      }
+      toggleFire(forceState) {
+        this.init();
+        if (!this.ctx) return false;
+        if (typeof forceState === 'boolean') {
+          this.isFirePlaying = !forceState;
+        }
+        if (this.isFirePlaying) {
+          if (this.fireInterval) {
+            clearInterval(this.fireInterval);
+            this.fireInterval = null;
+          }
+          this.isFirePlaying = false;
+          return false;
+        } else {
+          this.isFirePlaying = true;
+          this.fireInterval = setInterval(() => {
+            if (!this.isFirePlaying || !this.ctx) return;
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = "triangle";
+            osc.frequency.setValueAtTime(800 + Math.random() * 1200, now);
+            osc.frequency.exponentialRampToValueAtTime(120, now + 0.025);
+            gain.gain.setValueAtTime(0.08 + Math.random() * 0.1, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.025);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.025);
+          }, 140);
+          return true;
+        }
+      }
+    }
+    const sounds = new SoundEngine();
+  </script>
+
+  <!-- Three.js Spatial Engine Script -->
+  <script>
+    let scene, camera, renderer, raycaster, mouse;
+    let currentRoom = 'bar';
+    let currentDenState = null;
+    let interactiveObjects = [];
+    let characterMeshes = {};
+    let activeSelectedUserId = null;
+    let particleSystems = [];
+    let vinylDiscMesh = null;
+    let diceMesh = null;
+    let dogMesh = null;
+
+    let selectedOutfitHex = "#38bdf8";
+    let selectedSkinHex = "#fbcfe8";
+    let activeCustomLayout = null;
+    let availableCustomLayouts = [];
+
+    const canvas = document.getElementById('webgl-canvas');
+
+    function init3D() {
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x0a0705);
+      scene.fog = new THREE.FogExp2(0x0a0705, 0.045);
+
+      camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 100);
+      camera.position.set(0, 3.8, 9.2);
+      camera.lookAt(0, 1.2, 0);
+
+      renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.1;
+
+      raycaster = new THREE.Raycaster();
+      mouse = new THREE.Vector2();
+
+      window.addEventListener('resize', onWindowResize);
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('click', onCanvasClick);
+
+      setupRoom(currentRoom);
+      animate();
+    }
+
+    function onWindowResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    let mouseNormalized = { x: 0, y: 0 };
+    function onMouseMove(e) {
+      mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+      mouseNormalized.x = mouse.x;
+      mouseNormalized.y = mouse.y;
+
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObjects(interactiveObjects, true);
+      document.body.style.cursor = intersects.length > 0 ? 'pointer' : 'default';
+    }
+
+    function clearCurrentRoom() {
+      while(scene.children.length > 0){ 
+        const obj = scene.children[0];
+        scene.remove(obj); 
+      }
+      interactiveObjects = [];
+      characterMeshes = {};
+      particleSystems = [];
+      vinylDiscMesh = null;
+      diceMesh = null;
+      dogMesh = null;
+    }
+
+    function setupRoom(roomType) {
+      clearCurrentRoom();
+      currentRoom = roomType;
+
+      if (roomType === 'bar') {
+        buildSpeakeasyBar();
+      } else if (roomType === 'booth') {
+        buildCornerBooth();
+      } else if (roomType === 'poker') {
+        buildPokerDen();
+      } else if (roomType === 'library') {
+        buildHearthLibrary();
+      } else if (roomType === 'custom') {
+        if (activeCustomLayout) {
+          buildProceduralRoom(activeCustomLayout);
+        } else if (availableCustomLayouts.length > 0) {
+          buildProceduralRoom(availableCustomLayouts[0]);
+        } else {
+          buildSpeakeasyBar();
+        }
+      }
+
+      updateSpeechBubblePosition();
+    }
+
+    /* ========================================================================= */
+    /* 1. THE VELVET SPEAKEASY BAR (Three.js Artisan Scene)                      */
+    /* ========================================================================= */
+    function buildSpeakeasyBar() {
+      document.getElementById('roomTitle').innerText = 'THE VELVET SPEAKEASY';
+      scene.background.set(0x0c0805);
+      scene.fog.color.set(0x0c0805);
+
+      const ambient = new THREE.AmbientLight(0x2a170d, 0.8);
+      scene.add(ambient);
+
+      // Three Warm Hanging Edison Pendants
+      const lightPositions = [-3.2, 0, 3.2];
+      lightPositions.forEach(x => {
+        const pLight = new THREE.PointLight(0xffaa44, 2.2, 10);
+        pLight.position.set(x, 3.4, 0.5);
+        pLight.castShadow = true;
+        pLight.shadow.mapSize.width = 1024;
+        pLight.shadow.mapSize.height = 1024;
+        scene.add(pLight);
+
+        const wireGeo = new THREE.CylinderGeometry(0.015, 0.015, 1.8, 8);
+        const wireMat = new THREE.MeshBasicMaterial({ color: 0x111111 });
+        const wire = new THREE.Mesh(wireGeo, wireMat);
+        wire.position.set(x, 4.3, 0.5);
+        scene.add(wire);
+
+        const bulbGeo = new THREE.SphereGeometry(0.12, 16, 16);
+        const bulbMat = new THREE.MeshBasicMaterial({ color: 0xffe6a3 });
+        const bulb = new THREE.Mesh(bulbGeo, bulbMat);
+        bulb.position.set(x, 3.4, 0.5);
+        scene.add(bulb);
+      });
+
+      // Polished Oak Floor
+      const floorGeo = new THREE.PlaneGeometry(24, 16);
+      const floorMat = new THREE.MeshStandardMaterial({
+        color: 0x241309,
+        roughness: 0.35,
+        metalness: 0.1
+      });
+      const floor = new THREE.Mesh(floorGeo, floorMat);
+      floor.rotation.x = -Math.PI / 2;
+      floor.receiveShadow = true;
+      scene.add(floor);
+
+      // Back Brick/Wood Wall
+      const wallGeo = new THREE.PlaneGeometry(24, 10);
+      const wallMat = new THREE.MeshStandardMaterial({
+        color: 0x180d07,
+        roughness: 0.85
+      });
+      const backWall = new THREE.Mesh(wallGeo, wallMat);
+      backWall.position.set(0, 5, -3.2);
+      backWall.receiveShadow = true;
+      scene.add(backWall);
+
+      // Back Shelves with Illuminated Liquor Bottles
+      for (let s = 0; s < 3; s++) {
+        const shelfGeo = new THREE.BoxGeometry(14, 0.08, 0.6);
+        const shelfMat = new THREE.MeshStandardMaterial({ color: 0x3d2011, roughness: 0.4 });
+        const shelf = new THREE.Mesh(shelfGeo, shelfMat);
+        shelf.position.set(0, 2.2 + s * 0.9, -3.0);
+        shelf.castShadow = true;
+        scene.add(shelf);
+
+        const colors = [0xd97706, 0x059669, 0xb91c1c, 0xf59e0b, 0x7c2d12];
+        for (let b = -6; b <= 6; b += 0.55) {
+          const bH = 0.35 + Math.sin(b * 3 + s) * 0.1;
+          const bGeo = new THREE.CylinderGeometry(0.06, 0.08, bH, 10);
+          const bMat = new THREE.MeshStandardMaterial({
+            color: colors[Math.abs(Math.floor(b * 2)) % colors.length],
+            roughness: 0.1,
+            metalness: 0.3,
+            transparent: true,
+            opacity: 0.85
+          });
+          const bottle = new THREE.Mesh(bGeo, bMat);
+          bottle.position.set(b, 2.2 + s * 0.9 + bH / 2 + 0.04, -3.0);
+          scene.add(bottle);
+        }
+      }
+
+      // Bar Counter
+      const counterGeo = new THREE.BoxGeometry(13, 1.25, 1.4);
+      const counterMat = new THREE.MeshStandardMaterial({
+        color: 0x3a190b,
+        roughness: 0.25,
+        metalness: 0.05
+      });
+      const counter = new THREE.Mesh(counterGeo, counterMat);
+      counter.position.set(0, 1.25 / 2, 0.2);
+      counter.castShadow = true;
+      counter.receiveShadow = true;
+      scene.add(counter);
+
+      const lipGeo = new THREE.BoxGeometry(13.2, 0.1, 1.6);
+      const lipMat = new THREE.MeshStandardMaterial({ color: 0x522410, roughness: 0.2 });
+      const lip = new THREE.Mesh(lipGeo, lipMat);
+      lip.position.set(0, 1.25, 0.2);
+      lip.castShadow = true;
+      scene.add(lip);
+
+      const railGeo = new THREE.CylinderGeometry(0.04, 0.04, 12.8, 12);
+      const brassMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.85, roughness: 0.2 });
+      const rail = new THREE.Mesh(railGeo, brassMat);
+      rail.rotation.z = Math.PI / 2;
+      rail.position.set(0, 0.25, 1.15);
+      scene.add(rail);
+
+      build3DJukebox(-5.2, 1.4, -1.8);
+      build3DChalkboard(5.2, 2.2, -2.8);
+      build3DDiceCoaster(0.4, 1.3, 0.5);
+      buildPersianRugAndDog(0, 0.01, 1.8);
+      buildBarStoolsAndCharacters();
+      initParticles();
+    }
+
+    function build3DJukebox(x, y, z) {
+      const jGroup = new THREE.Group();
+      jGroup.position.set(x, y, z);
+      jGroup.rotation.y = 0.45;
+
+      const bodyGeo = new THREE.CylinderGeometry(0.7, 0.8, 2.2, 24, 1, false, 0, Math.PI);
+      const bodyMat = new THREE.MeshStandardMaterial({ color: 0x2e1509, roughness: 0.4 });
+      const body = new THREE.Mesh(bodyGeo, bodyMat);
+      body.rotation.y = Math.PI;
+      jGroup.add(body);
+
+      const archGeo = new THREE.TorusGeometry(0.68, 0.05, 12, 24, Math.PI);
+      const archMat = new THREE.MeshBasicMaterial({ color: 0xfbbf24 });
+      const arch = new THREE.Mesh(archGeo, archMat);
+      arch.position.set(0, 0.7, 0.05);
+      jGroup.add(arch);
+
+      const vinylGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.02, 32);
+      const vinylMat = new THREE.MeshStandardMaterial({ color: 0x050505, roughness: 0.1 });
+      vinylDiscMesh = new THREE.Mesh(vinylGeo, vinylMat);
+      vinylDiscMesh.position.set(0, 0.4, 0.15);
+      vinylDiscMesh.rotation.x = Math.PI / 4;
+      jGroup.add(vinylDiscMesh);
+
+      const hit = new THREE.Mesh(new THREE.BoxGeometry(1.6, 2.4, 1.2), new THREE.MeshBasicMaterial({ visible: false }));
+      hit.userData = { type: 'jukebox' };
+      jGroup.add(hit);
+      interactiveObjects.push(hit);
+
+      scene.add(jGroup);
+    }
+
+    function build3DChalkboard(x, y, z) {
+      const cGroup = new THREE.Group();
+      cGroup.position.set(x, y, z);
+      cGroup.rotation.y = -0.35;
+
+      const frameGeo = new THREE.BoxGeometry(2.2, 1.6, 0.1);
+      const frameMat = new THREE.MeshStandardMaterial({ color: 0x4a2810, roughness: 0.6 });
+      const frame = new THREE.Mesh(frameGeo, frameMat);
+      cGroup.add(frame);
+
+      const slateGeo = new THREE.PlaneGeometry(2.0, 1.4);
+      const slateMat = new THREE.MeshStandardMaterial({ color: 0x121c15, roughness: 0.9 });
+      const slate = new THREE.Mesh(slateGeo, slateMat);
+      slate.position.z = 0.06;
+      cGroup.add(slate);
+
+      frame.userData = { type: 'chalkboard' };
+      interactiveObjects.push(frame);
+
+      scene.add(cGroup);
+    }
+
+    function build3DDiceCoaster(x, y, z) {
+      const dGroup = new THREE.Group();
+      dGroup.position.set(x, y, z);
+
+      const coasterGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.04, 24);
+      const coasterMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5 });
+      const coaster = new THREE.Mesh(coasterGeo, coasterMat);
+      dGroup.add(coaster);
+
+      const diceGeo = new THREE.BoxGeometry(0.12, 0.12, 0.12);
+      const diceMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3 });
+      diceMesh = new THREE.Mesh(diceGeo, diceMat);
+      diceMesh.position.set(0, 0.08, 0);
+      diceMesh.rotation.set(0.3, 0.5, 0.2);
+      dGroup.add(diceMesh);
+
+      const hit = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.5, 0.8), new THREE.MeshBasicMaterial({ visible: false }));
+      hit.userData = { type: 'dice' };
+      dGroup.add(hit);
+      interactiveObjects.push(hit);
+
+      scene.add(dGroup);
+    }
+
+    function buildPersianRugAndDog(x, y, z) {
+      const rGroup = new THREE.Group();
+      rGroup.position.set(x, y, z);
+
+      const rugGeo = new THREE.PlaneGeometry(5.2, 2.2);
+      const rugMat = new THREE.MeshStandardMaterial({ color: 0x881337, roughness: 0.9 });
+      const rug = new THREE.Mesh(rugGeo, rugMat);
+      rug.rotation.x = -Math.PI / 2;
+      rug.receiveShadow = true;
+      rGroup.add(rug);
+
+      // Byte the Shiba (sleeping) using standard Cylinder + Spheres
+      const dBodyGeo = new THREE.CylinderGeometry(0.18, 0.18, 0.45, 16);
+      const dMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.7 });
+      dogMesh = new THREE.Mesh(dBodyGeo, dMat);
+      dogMesh.rotation.z = Math.PI / 2;
+      dogMesh.position.set(-0.8, 0.18, 0);
+      dogMesh.castShadow = true;
+      rGroup.add(dogMesh);
+
+      const dHeadGeo = new THREE.SphereGeometry(0.18, 12, 12);
+      const dHead = new THREE.Mesh(dHeadGeo, dMat);
+      dHead.position.set(-0.5, 0.22, 0);
+      rGroup.add(dHead);
+
+      const hit = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.6, 0.8), new THREE.MeshBasicMaterial({ visible: false }));
+      hit.position.set(-0.7, 0.2, 0);
+      hit.userData = { type: 'dog' };
+      rGroup.add(hit);
+      interactiveObjects.push(hit);
+
+      scene.add(rGroup);
+    }
+
+    function buildBarStoolsAndCharacters() {
+      const stoolSpacing = 1.9;
+      const startX = -2.85;
+
+      const friendsList = [
+        { id: "badri", name: "Badri", drink: "coffee", color: 0x38bdf8, skin: 0xfbcfe8, hair: 0x1c1917, hairStyle: "beanie", accessory: "glasses" },
+        { id: "dave", name: "Dave", drink: "beer", color: 0x10b981, skin: 0xfde047, hair: 0x78350f, hairStyle: "cap", accessory: "headphones" },
+        { id: "priya", name: "Priya", drink: "cocktail", color: 0xf43f5e, skin: 0xfbcfe8, hair: 0x0f172a, hairStyle: "curly", accessory: "scarf" },
+        { id: "sam", name: "Sam", drink: "tea", color: 0xa855f7, skin: 0xfcd34d, hair: 0x475569, hairStyle: "sleek", accessory: "camera" }
+      ];
+
+      for (let i = 0; i < 4; i++) {
+        const x = startX + i * stoolSpacing;
+        const f = friendsList[i];
+        if (currentDenState) {
+          const u = currentDenState.users.find(usr => usr.id === f.id);
+          if (u && u.avatar_config) {
+            f.color = parseInt(u.avatar_config.outfit_color.replace("#", "0x"));
+            f.skin = parseInt(u.avatar_config.skin_tone.replace("#", "0x"));
+            f.hair = parseInt(u.avatar_config.hair_color.replace("#", "0x"));
+            f.hairStyle = u.avatar_config.hair_style;
+            f.drink = u.avatar_config.drink;
+            f.accessory = u.avatar_config.accessory;
+          }
+        }
+        const stoolGroup = createStoolWithCharacter(x, f);
+        scene.add(stoolGroup);
+      }
+
+      const emptyStool = createEmptyStool(startX + 4 * stoolSpacing);
+      scene.add(emptyStool);
+    }
+
+    function createStoolWithCharacter(x, friendData) {
+      const group = new THREE.Group();
+      group.position.set(x, 0, 1.45);
+
+      // Stool
+      const cushionGeo = new THREE.CylinderGeometry(0.42, 0.42, 0.16, 24);
+      const cushionMat = new THREE.MeshStandardMaterial({ color: 0x991b1b, roughness: 0.35 });
+      const cushion = new THREE.Mesh(cushionGeo, cushionMat);
+      cushion.position.y = 0.88;
+      cushion.castShadow = true;
+      group.add(cushion);
+
+      const poleGeo = new THREE.CylinderGeometry(0.045, 0.045, 0.84, 16);
+      const chromeMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.9, roughness: 0.15 });
+      const pole = new THREE.Mesh(poleGeo, chromeMat);
+      pole.position.y = 0.42;
+      group.add(pole);
+
+      const baseGeo = new THREE.CylinderGeometry(0.35, 0.38, 0.05, 24);
+      const base = new THREE.Mesh(baseGeo, chromeMat);
+      base.position.y = 0.025;
+      group.add(base);
+
+      // Character Group
+      const charGroup = new THREE.Group();
+      charGroup.position.y = 0.96;
+
+      // Legs
+      const legGeo = new THREE.CylinderGeometry(0.09, 0.08, 0.65, 12);
+      const jeansMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8 });
+      const leftLeg = new THREE.Mesh(legGeo, jeansMat);
+      leftLeg.position.set(-0.16, 0.05, -0.2);
+      leftLeg.rotation.x = Math.PI / 4;
+      charGroup.add(leftLeg);
+
+      const rightLeg = new THREE.Mesh(legGeo, jeansMat);
+      rightLeg.position.set(0.16, 0.05, -0.2);
+      rightLeg.rotation.x = Math.PI / 4;
+      charGroup.add(rightLeg);
+
+      // Torso / Sweater
+      const torsoGeo = new THREE.BoxGeometry(0.55, 0.65, 0.35);
+      const sweaterMat = new THREE.MeshStandardMaterial({ color: friendData.color, roughness: 0.6 });
+      const torso = new THREE.Mesh(torsoGeo, sweaterMat);
+      torso.position.y = 0.58;
+      torso.castShadow = true;
+      charGroup.add(torso);
+
+      // Arms
+      const armGeo = new THREE.CylinderGeometry(0.07, 0.06, 0.5, 10);
+      const lArm = new THREE.Mesh(armGeo, sweaterMat);
+      lArm.position.set(-0.32, 0.5, -0.2);
+      lArm.rotation.x = -Math.PI / 3;
+      charGroup.add(lArm);
+
+      const rArm = new THREE.Mesh(armGeo, sweaterMat);
+      rArm.position.set(0.32, 0.5, -0.2);
+      rArm.rotation.x = -Math.PI / 3;
+      charGroup.add(rArm);
+
+      // Head
+      const headGeo = new THREE.SphereGeometry(0.22, 16, 16);
+      const skinMat = new THREE.MeshStandardMaterial({ color: friendData.skin || 0xfbcfe8, roughness: 0.5 });
+      const head = new THREE.Mesh(headGeo, skinMat);
+      head.position.y = 1.05;
+      head.castShadow = true;
+      charGroup.add(head);
+
+      // Hair / Hat Mesh
+      const hairGroup = createHairMesh(friendData.hairStyle, friendData.hair);
+      hairGroup.position.y = 1.08;
+      charGroup.add(hairGroup);
+
+      // Accessory Mesh
+      const accMesh = createAccessoryMesh(friendData.accessory);
+      accMesh.position.y = 1.05;
+      charGroup.add(accMesh);
+
+      // Signature Drink Prop
+      const drinkMesh = createDrinkProp(friendData.drink);
+      drinkMesh.position.set(0, 0.34, -0.55);
+      charGroup.add(drinkMesh);
+
+      group.add(charGroup);
+
+      // Hitbox
+      const hit = new THREE.Mesh(new THREE.BoxGeometry(0.9, 1.8, 0.9), new THREE.MeshBasicMaterial({ visible: false }));
+      hit.position.y = 1.0;
+      hit.userData = { type: 'character', id: friendData.id };
+      group.add(hit);
+      interactiveObjects.push(hit);
+
+      characterMeshes[friendData.id] = {
+        group: charGroup,
+        head: head,
+        torso: torso,
+        hairGroup: hairGroup,
+        accMesh: accMesh,
+        drinkMesh: drinkMesh,
+        root: group,
+        baseY: charGroup.position.y
+      };
+
+      return group;
+    }
+
+    function createHairMesh(style, color) {
+      const g = new THREE.Group();
+      const mat = new THREE.MeshStandardMaterial({ color: color, roughness: 0.8 });
+
+      if (style === 'beanie') {
+        const dome = new THREE.Mesh(new THREE.SphereGeometry(0.24, 16, 16, 0, Math.PI * 2, 0, Math.PI / 2), mat);
+        g.add(dome);
+        const rim = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.08, 16), mat);
+        rim.position.y = -0.02;
+        g.add(rim);
+      } else if (style === 'cap') {
+        const dome = new THREE.Mesh(new THREE.SphereGeometry(0.24, 16, 16, 0, Math.PI * 2, 0, Math.PI / 2), mat);
+        g.add(dome);
+        const visor = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.03, 0.22), mat);
+        visor.position.set(0, -0.02, 0.2);
+        visor.rotation.x = 0.15;
+        g.add(visor);
+      } else if (style === 'curly') {
+        for (let i = 0; i < 7; i++) {
+          const angle = (i / 7) * Math.PI * 2;
+          const puff = new THREE.Mesh(new THREE.SphereGeometry(0.09, 8, 8), mat);
+          puff.position.set(Math.cos(angle) * 0.16, 0.06 + Math.sin(i) * 0.04, Math.sin(angle) * 0.16);
+          g.add(puff);
+        }
+      } else if (style === 'sleek') {
+        const hair = new THREE.Mesh(new THREE.SphereGeometry(0.23, 16, 16, 0, Math.PI * 2, 0, Math.PI * 0.6), mat);
+        hair.position.z = -0.03;
+        g.add(hair);
+      } else if (style === 'messy') {
+        const hair = new THREE.Mesh(new THREE.SphereGeometry(0.24, 12, 12), mat);
+        g.add(hair);
+        for (let i = 0; i < 5; i++) {
+          const spike = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.15, 6), mat);
+          spike.position.set((Math.random() - 0.5) * 0.2, 0.18, (Math.random() - 0.5) * 0.2);
+          spike.rotation.set((Math.random() - 0.5), 0, (Math.random() - 0.5));
+          g.add(spike);
+        }
+      } // 'bald' returns empty group
+
+      return g;
+    }
+
+    function createAccessoryMesh(acc) {
+      const g = new THREE.Group();
+      if (acc === 'glasses') {
+        const wireMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.9, roughness: 0.2 });
+        const lRim = new THREE.Mesh(new THREE.TorusGeometry(0.065, 0.012, 8, 16), wireMat);
+        lRim.position.set(-0.1, 0, 0.21);
+        g.add(lRim);
+        const rRim = new THREE.Mesh(new THREE.TorusGeometry(0.065, 0.012, 8, 16), wireMat);
+        rRim.position.set(0.1, 0, 0.21);
+        g.add(rRim);
+        const bridge = new THREE.Mesh(new THREE.CylinderGeometry(0.01, 0.01, 0.08, 8), wireMat);
+        bridge.rotation.z = Math.PI / 2;
+        bridge.position.set(0, 0, 0.21);
+        g.add(bridge);
+      } else if (acc === 'headphones') {
+        const hpMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.4 });
+        const arch = new THREE.Mesh(new THREE.TorusGeometry(0.25, 0.025, 8, 24, Math.PI), hpMat);
+        arch.position.y = 0.05;
+        g.add(arch);
+        const lCup = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.06, 12), hpMat);
+        lCup.rotation.z = Math.PI / 2;
+        lCup.position.set(-0.24, 0.05, 0);
+        g.add(lCup);
+        const rCup = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.06, 12), hpMat);
+        rCup.rotation.z = Math.PI / 2;
+        rCup.position.set(0.24, 0.05, 0);
+        g.add(rCup);
+      } else if (acc === 'scarf') {
+        const sMat = new THREE.MeshStandardMaterial({ color: 0xb91c1c, roughness: 0.9 });
+        const ring = new THREE.Mesh(new THREE.TorusGeometry(0.22, 0.06, 8, 24), sMat);
+        ring.rotation.x = Math.PI / 2;
+        ring.position.y = -0.22;
+        g.add(ring);
+      } else if (acc === 'camera') {
+        const cMat = new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.8, roughness: 0.3 });
+        const camBox = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.11, 0.08), cMat);
+        camBox.position.set(0.18, -0.4, 0.15);
+        g.add(camBox);
+        const lens = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.05, 12), cMat);
+        lens.rotation.x = Math.PI / 2;
+        lens.position.set(0.18, -0.4, 0.2);
+        g.add(lens);
+      }
+      return g;
+    }
+
+    function createDrinkProp(drinkType) {
+      const g = new THREE.Group();
+      if (drinkType === 'coffee') {
+        const mug = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.07, 0.16, 12), new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.2 }));
+        g.add(mug);
+        const brew = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.065, 0.01, 12), new THREE.MeshStandardMaterial({ color: 0x271406 }));
+        brew.position.y = 0.075;
+        g.add(brew);
+      } else if (drinkType === 'beer') {
+        const glass = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.07, 0.24, 14), new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.1, transparent: true, opacity: 0.85 }));
+        g.add(glass);
+        const foam = new THREE.Mesh(new THREE.CylinderGeometry(0.092, 0.09, 0.04, 14), new THREE.MeshStandardMaterial({ color: 0xfffbeb, roughness: 0.9 }));
+        foam.position.y = 0.12;
+        g.add(foam);
+      } else if (drinkType === 'cocktail') {
+        const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.18, 8), new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.9 }));
+        g.add(stem);
+        const bowl = new THREE.Mesh(new THREE.ConeGeometry(0.14, 0.12, 16), new THREE.MeshStandardMaterial({ color: 0xf43f5e, transparent: true, opacity: 0.85 }));
+        bowl.position.y = 0.12;
+        g.add(bowl);
+      } else if (drinkType === 'boba') {
+        const cup = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.06, 0.26, 14), new THREE.MeshStandardMaterial({ color: 0xd6c7b2, transparent: true, opacity: 0.85 }));
+        g.add(cup);
+        const straw = new THREE.Mesh(new THREE.CylinderGeometry(0.01, 0.01, 0.32, 8), new THREE.MeshStandardMaterial({ color: 0xec4899 }));
+        straw.position.set(0.02, 0.06, 0);
+        straw.rotation.z = -0.15;
+        g.add(straw);
+      } else if (drinkType === 'scotch') {
+        const glass = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.14, 12), new THREE.MeshStandardMaterial({ color: 0xb45309, transparent: true, opacity: 0.85 }));
+        g.add(glass);
+        const ice = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.06, 0.06), new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity: 0.7 }));
+        ice.position.y = 0.02;
+        g.add(ice);
+      } else {
+        const cup = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.06, 0.14, 10), new THREE.MeshStandardMaterial({ color: 0x059669, roughness: 0.6 }));
+        g.add(cup);
+      }
+      return g;
+    }
+
+    function createEmptyStool(x) {
+      const group = new THREE.Group();
+      group.position.set(x, 0, 1.45);
+
+      const cushion = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.16, 24), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.5 }));
+      cushion.position.y = 0.88;
+      group.add(cushion);
+
+      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.84, 16), new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.8, roughness: 0.3 }));
+      pole.position.y = 0.42;
+      group.add(pole);
+
+      const base = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.38, 0.05, 24), new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.8, roughness: 0.3 }));
+      base.position.y = 0.025;
+      group.add(base);
+
+      const plaque = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.25, 0.06), new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.85, roughness: 0.2 }));
+      plaque.position.set(0, 1.35, 0);
+      group.add(plaque);
+
+      const hit = new THREE.Mesh(new THREE.BoxGeometry(1.0, 1.6, 1.0), new THREE.MeshBasicMaterial({ visible: false }));
+      hit.position.y = 0.9;
+      hit.userData = { type: 'empty_chair' };
+      group.add(hit);
+      interactiveObjects.push(hit);
+
+      return group;
+    }
+
+    /* ========================================================================= */
+    /* 2. THE BASEMENT POKER DEN (Alternative Scene)                             */
+    /* ========================================================================= */
+    function buildPokerDen() {
+      document.getElementById('roomTitle').innerText = 'BASEMENT POKER DEN';
+      scene.background.set(0x02170f);
+      scene.fog.color.set(0x02170f);
+
+      const ambient = new THREE.AmbientLight(0x064e3b, 0.6);
+      scene.add(ambient);
+
+      const overheadLight = new THREE.SpotLight(0xfff7ed, 4.0, 12, Math.PI / 4, 0.4, 1);
+      overheadLight.position.set(0, 4.2, 0);
+      overheadLight.target.position.set(0, 1.0, 0);
+      overheadLight.castShadow = true;
+      scene.add(overheadLight);
+      scene.add(overheadLight.target);
+
+      const floor = new THREE.Mesh(new THREE.PlaneGeometry(24, 16), new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.9 }));
+      floor.rotation.x = -Math.PI / 2;
+      floor.receiveShadow = true;
+      scene.add(floor);
+
+      const table = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 2.4, 0.12, 32), new THREE.MeshStandardMaterial({ color: 0x047857, roughness: 0.9 }));
+      table.position.set(0, 1.1, 0);
+      table.receiveShadow = true;
+      scene.add(table);
+
+      const bumper = new THREE.Mesh(new THREE.TorusGeometry(2.45, 0.14, 16, 32), new THREE.MeshStandardMaterial({ color: 0x271406, roughness: 0.4 }));
+      bumper.rotation.x = Math.PI / 2;
+      bumper.position.set(0, 1.16, 0);
+      bumper.castShadow = true;
+      scene.add(bumper);
+
+      const tableBase = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.8, 1.1, 16), new THREE.MeshStandardMaterial({ color: 0x1f1610 }));
+      tableBase.position.set(0, 0.55, 0);
+      scene.add(tableBase);
+
+      for (let c = 0; c < 8; c++) {
+        const angle = (c / 8) * Math.PI * 2;
+        const stack = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.15, 12), new THREE.MeshStandardMaterial({ color: c % 2 === 0 ? 0xdc2626 : 0x2563eb }));
+        stack.position.set(Math.cos(angle) * 1.2, 1.22, Math.sin(angle) * 1.2);
+        scene.add(stack);
+      }
+
+      build3DDiceCoaster(0, 1.18, 0.3);
+      buildPokerCharacters();
+    }
+
+    function buildPokerCharacters() {
+      const friends = [
+        { id: "badri", angle: Math.PI * 0.75, color: 0x38bdf8 },
+        { id: "dave", angle: Math.PI * 0.25, color: 0x10b981 },
+        { id: "priya", angle: -Math.PI * 0.25, color: 0xf43f5e },
+        { id: "sam", angle: -Math.PI * 0.75, color: 0xa855f7 }
+      ];
+
+      friends.forEach(f => {
+        if (currentDenState) {
+          const u = currentDenState.users.find(usr => usr.id === f.id);
+          if (u && u.avatar_config) {
+            f.color = parseInt(u.avatar_config.outfit_color.replace("#", "0x"));
+          }
+        }
+        const x = Math.cos(f.angle) * 3.1;
+        const z = Math.sin(f.angle) * 3.1;
+        const pGroup = new THREE.Group();
+        pGroup.position.set(x, 0, z);
+        pGroup.lookAt(0, 1.1, 0);
+
+        const chair = new THREE.Mesh(new THREE.BoxGeometry(0.7, 1.2, 0.7), new THREE.MeshStandardMaterial({ color: 0x1e1510 }));
+        chair.position.y = 0.6;
+        pGroup.add(chair);
+
+        const torso = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.65, 0.35), new THREE.MeshStandardMaterial({ color: f.color }));
+        torso.position.y = 1.1;
+        pGroup.add(torso);
+
+        const head = new THREE.Mesh(new THREE.SphereGeometry(0.22, 16, 16), new THREE.MeshStandardMaterial({ color: 0xfbcfe8 }));
+        head.position.y = 1.55;
+        pGroup.add(head);
+
+        const hit = new THREE.Mesh(new THREE.BoxGeometry(1.0, 1.8, 1.0), new THREE.MeshBasicMaterial({ visible: false }));
+        hit.position.y = 1.1;
+        hit.userData = { type: 'character', id: f.id };
+        pGroup.add(hit);
+        interactiveObjects.push(hit);
+
+        characterMeshes[f.id] = { group: pGroup, head: head, torso: torso, root: pGroup, baseY: 1.1 };
+        scene.add(pGroup);
+      });
+    }
+
+    /* ========================================================================= */
+    /* 3. THE HEARTH LIBRARY (Artisan Reading & Focus Sanctum)                   */
+    /* ========================================================================= */
+    function buildHearthLibrary() {
+      document.getElementById('roomTitle').innerText = 'THE HEARTH LIBRARY';
+      scene.background.set(0x180f0a);
+      scene.fog.color.set(0x180f0a);
+
+      // Warm Ambient & Overhead Chandelier Lighting
+      const ambient = new THREE.AmbientLight(0x422415, 1.15);
+      scene.add(ambient);
+
+      const ceilingLight = new THREE.PointLight(0xffe6ab, 2.0, 14);
+      ceilingLight.position.set(0, 4.2, 0.4);
+      ceilingLight.castShadow = true;
+      scene.add(ceilingLight);
+
+      // Polished Oak Herringbone Parquet Floor
+      const floorGeo = new THREE.PlaneGeometry(24, 18);
+      const floorMat = new THREE.MeshStandardMaterial({
+        color: 0x27160b,
+        roughness: 0.38,
+        metalness: 0.08
+      });
+      const floor = new THREE.Mesh(floorGeo, floorMat);
+      floor.rotation.x = -Math.PI / 2;
+      floor.receiveShadow = true;
+      scene.add(floor);
+
+      // Warm Dark Paneled Back Library Wall
+      const backWallGeo = new THREE.PlaneGeometry(24, 12);
+      const backWallMat = new THREE.MeshStandardMaterial({
+        color: 0x1c1008,
+        roughness: 0.85
+      });
+      const backWall = new THREE.Mesh(backWallGeo, backWallMat);
+      backWall.position.set(0, 5, -3.4);
+      backWall.receiveShadow = true;
+      scene.add(backWall);
+
+      // Left & Right Library Wood Walls
+      const leftWall = new THREE.Mesh(new THREE.PlaneGeometry(18, 12), new THREE.MeshStandardMaterial({ color: 0x170d06, roughness: 0.85 }));
+      leftWall.rotation.y = Math.PI / 2;
+      leftWall.position.set(-6.8, 5, 0);
+      leftWall.receiveShadow = true;
+      scene.add(leftWall);
+
+      const rightWall = new THREE.Mesh(new THREE.PlaneGeometry(18, 12), new THREE.MeshStandardMaterial({ color: 0x170d06, roughness: 0.85 }));
+      rightWall.rotation.y = -Math.PI / 2;
+      rightWall.position.set(6.8, 5, 0);
+      rightWall.receiveShadow = true;
+      scene.add(rightWall);
+
+      // Arched Library Stained Glass Bay Window on Far Left
+      const winFrame = new THREE.Mesh(new THREE.BoxGeometry(3.2, 4.4, 0.12), new THREE.MeshStandardMaterial({ color: 0x3d2011, roughness: 0.4 }));
+      winFrame.position.set(-5.0, 3.4, -3.3);
+      scene.add(winFrame);
+
+      const winGlass = new THREE.Mesh(new THREE.PlaneGeometry(2.9, 4.1), new THREE.MeshStandardMaterial({
+        color: 0x1e293b,
+        roughness: 0.1,
+        metalness: 0.8,
+        transparent: true,
+        opacity: 0.7
+      }));
+      winGlass.position.set(-5.0, 3.4, -3.22);
+      scene.add(winGlass);
+
+      // Handcrafted Stone Hearth & Chimney
+      const chimney = new THREE.Mesh(new THREE.BoxGeometry(4.2, 8.0, 1.4), new THREE.MeshStandardMaterial({
+        color: 0x3c2619,
+        roughness: 0.95
+      }));
+      chimney.position.set(0, 4.0, -2.7);
+      chimney.castShadow = true;
+      chimney.receiveShadow = true;
+      scene.add(chimney);
+
+      // Heavy Carved Walnut Mantelpiece
+      const mantel = new THREE.Mesh(new THREE.BoxGeometry(4.6, 0.22, 1.6), new THREE.MeshStandardMaterial({
+        color: 0x2e1509,
+        roughness: 0.25
+      }));
+      mantel.position.set(0, 2.35, -2.5);
+      mantel.castShadow = true;
+      scene.add(mantel);
+
+      // Mantelpiece Ornaments (Antique Brass Clock & Candlesticks)
+      const clockBase = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.32, 16), new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.85, roughness: 0.2 }));
+      clockBase.position.set(0, 2.62, -2.5);
+      scene.add(clockBase);
+
+      const stickPositions = [-1.4, 1.4];
+      for (let i = 0; i < stickPositions.length; i++) {
+        const x = stickPositions[i];
+        const stick = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.07, 0.3, 12), new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.85, roughness: 0.2 }));
+        stick.position.set(x, 2.6, -2.5);
+        scene.add(stick);
+
+        const flame = new THREE.Mesh(new THREE.ConeGeometry(0.025, 0.07, 8), new THREE.MeshBasicMaterial({ color: 0xf59e0b }));
+        flame.position.set(x, 2.8, -2.5);
+        scene.add(flame);
+      }
+
+      // Hearth Fire Cavity
+      const cavity = new THREE.Mesh(new THREE.BoxGeometry(2.6, 1.7, 1.0), new THREE.MeshBasicMaterial({ color: 0x080402 }));
+      cavity.position.set(0, 0.95, -2.2);
+      scene.add(cavity);
+
+      // Stacked Birch & Cedar Firewood Logs
+      const logMat1 = new THREE.MeshStandardMaterial({ color: 0xd8c8b8, roughness: 0.8 });
+      const logMat2 = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.8 });
+      const logMat3 = new THREE.MeshStandardMaterial({ color: 0x451a03, roughness: 0.9 });
+
+      const l1 = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 1.5, 10), logMat1);
+      l1.rotation.z = Math.PI / 2;
+      l1.position.set(0, 0.25, -2.05);
+      scene.add(l1);
+
+      const l2 = new THREE.Mesh(new THREE.CylinderGeometry(0.10, 0.10, 1.4, 10), logMat2);
+      l2.rotation.z = Math.PI / 2.3;
+      l2.rotation.y = 0.2;
+      l2.position.set(-0.1, 0.42, -2.0);
+      scene.add(l2);
+
+      const l3 = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, 1.3, 10), logMat3);
+      l3.rotation.z = -Math.PI / 2.4;
+      l3.rotation.y = -0.15;
+      l3.position.set(0.12, 0.44, -1.95);
+      scene.add(l3);
+
+      // Glowing Fire Embers & Flickering Flames
+      const embers = new THREE.Mesh(new THREE.ConeGeometry(0.9, 0.65, 12), new THREE.MeshStandardMaterial({
+        color: 0xff3b00,
+        emissive: 0xff4400,
+        emissiveIntensity: 0.8,
+        roughness: 0.4
+      }));
+      embers.position.set(0, 0.42, -2.0);
+      scene.add(embers);
+
+      const flame1 = new THREE.Mesh(new THREE.ConeGeometry(0.35, 0.85, 8), new THREE.MeshBasicMaterial({ color: 0xffa500 }));
+      flame1.position.set(-0.15, 0.72, -2.0);
+      scene.add(flame1);
+
+      const flame2 = new THREE.Mesh(new THREE.ConeGeometry(0.3, 1.05, 8), new THREE.MeshBasicMaterial({ color: 0xff5500 }));
+      flame2.position.set(0.18, 0.82, -2.05);
+      scene.add(flame2);
+
+      // PointLight Casting Dynamic Amber Fire Shadows
+      const fireLight = new THREE.PointLight(0xff6611, 4.0, 12);
+      fireLight.position.set(0, 1.3, -1.8);
+      fireLight.castShadow = true;
+      scene.add(fireLight);
+
+      // Clickable Hearth Hit Area
+      const hearthHit = new THREE.Mesh(new THREE.BoxGeometry(4.2, 2.8, 1.6), new THREE.MeshBasicMaterial({ visible: false }));
+      hearthHit.position.set(0, 1.4, -2.2);
+      hearthHit.userData = { type: 'hearth' };
+      interactiveObjects.push(hearthHit);
+      scene.add(hearthHit);
+
+      // Massive Floor-to-Ceiling Bookcases Flanking the Hearth
+      buildLibraryBookcase(-4.6, 3.2, -2.8);
+      buildLibraryBookcase(4.6, 3.2, -2.8);
+
+      // Woven Ruby Persian Rug in front of Fireplace
+      buildPersianRugAndDog(0, 0.015, 0.5);
+
+      // Low Mahogany Reading Table & Green Banker's Lamp in Center
+      buildLibraryCoffeeTable(0, 0, 1.4);
+
+      // Library Armchairs & Friends
+      buildLibraryArmchairs();
+      initParticles();
+    }
+
+    function buildLibraryBookcase(x, y, z) {
+      const g = new THREE.Group();
+      g.position.set(x, y, z);
+
+      // Case Structure
+      const caseMesh = new THREE.Mesh(new THREE.BoxGeometry(2.6, 6.4, 0.85), new THREE.MeshStandardMaterial({ color: 0x2e160a, roughness: 0.6 }));
+      caseMesh.castShadow = true;
+      caseMesh.receiveShadow = true;
+      g.add(caseMesh);
+
+      // 5 Shelves with Books
+      const bookColors = [0x881337, 0x064e3b, 0x1e3a8a, 0xb45309, 0xc2410c, 0x451a03, 0x312e81, 0x701a75, 0x0f766e];
+      for (let s = -2.2; s <= 2.2; s += 1.1) {
+        const plank = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.06, 0.75), new THREE.MeshStandardMaterial({ color: 0x451a03, roughness: 0.4 }));
+        plank.position.set(0, s, 0.05);
+        g.add(plank);
+
+        let curX = -1.05;
+        let bIdx = 0;
+        while (curX < 1.05) {
+          const bW = 0.07 + ((bIdx * 3) % 5) * 0.015;
+          const bH = 0.42 + ((bIdx * 7) % 5) * 0.035;
+          const bMat = new THREE.MeshStandardMaterial({
+            color: bookColors[bIdx % bookColors.length],
+            roughness: 0.35
+          });
+          const book = new THREE.Mesh(new THREE.BoxGeometry(bW, bH, 0.55), bMat);
+          book.position.set(curX + bW / 2, s + bH / 2 + 0.03, 0.05);
+          g.add(book);
+          curX += bW + 0.02;
+          bIdx++;
+        }
+      }
+
+      scene.add(g);
+    }
+
+    function buildLibraryCoffeeTable(x, y, z) {
+      const tGroup = new THREE.Group();
+      tGroup.position.set(x, y, z);
+
+      const tableTop = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 0.85, 0.06, 24), new THREE.MeshStandardMaterial({ color: 0x35190c, roughness: 0.28, metalness: 0.08 }));
+      tableTop.position.y = 0.52;
+      tableTop.castShadow = true;
+      tableTop.receiveShadow = true;
+      tGroup.add(tableTop);
+
+      const tableBase = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.35, 0.5, 12), new THREE.MeshStandardMaterial({ color: 0x180b05 }));
+      tableBase.position.y = 0.25;
+      tGroup.add(tableBase);
+
+      // Banker's Reading Lamp
+      const lampBase = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.11, 0.03, 12), new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.9, roughness: 0.2 }));
+      lampBase.position.set(0.3, 0.56, -0.1);
+      tGroup.add(lampBase);
+
+      const lampPole = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.28, 8), new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.9, roughness: 0.2 }));
+      lampPole.position.set(0.3, 0.7, -0.1);
+      tGroup.add(lampPole);
+
+      const lampShade = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.22, 12, 1, false, 0, Math.PI), new THREE.MeshStandardMaterial({ color: 0x064e3b, roughness: 0.2 }));
+      lampShade.position.set(0.3, 0.84, -0.1);
+      lampShade.rotation.z = Math.PI / 2;
+      tGroup.add(lampShade);
+
+      const lampLight = new THREE.PointLight(0xfef08a, 0.8, 2.5);
+      lampLight.position.set(0.3, 0.82, -0.1);
+      tGroup.add(lampLight);
+
+      // Steaming Mug & Thread Journal
+      const mug = createDrinkProp('coffee');
+      mug.position.set(-0.25, 0.55, 0.1);
+      tGroup.add(mug);
+
+      const book = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.04, 0.32), new THREE.MeshStandardMaterial({ color: 0xfef08a, roughness: 0.7 }));
+      book.position.set(-0.02, 0.56, -0.15);
+      book.rotation.y = 0.15;
+      book.userData = { type: 'journal' };
+      tGroup.add(book);
+      interactiveObjects.push(book);
+
+      scene.add(tGroup);
+    }
+
+    function buildLibraryArmchairs() {
+      const chairs = [
+        { id: "badri", x: -2.2, z: 0.8, rot: 0.5, color: 0x38bdf8 },
+        { id: "dave", x: -1.0, z: 1.8, rot: 0.1, color: 0x10b981 },
+        { id: "priya", x: 1.0, z: 1.8, rot: -0.1, color: 0xf43f5e },
+        { id: "sam", x: 2.2, z: 0.8, rot: -0.5, color: 0xa855f7 }
+      ];
+
+      chairs.forEach(c => {
+        if (currentDenState) {
+          const u = currentDenState.users.find(usr => usr.id === c.id);
+          if (u && u.avatar_config) {
+            c.color = parseInt(u.avatar_config.outfit_color.replace("#", "0x"));
+          }
+        }
+        const aGroup = new THREE.Group();
+        aGroup.position.set(c.x, 0, c.z);
+        aGroup.rotation.y = c.rot;
+
+        const seat = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.5, 0.9), new THREE.MeshStandardMaterial({ color: 0x451a03 }));
+        seat.position.y = 0.4;
+        aGroup.add(seat);
+
+        const back = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.9, 0.25), new THREE.MeshStandardMaterial({ color: 0x451a03 }));
+        back.position.set(0, 0.9, 0.35);
+        aGroup.add(back);
+
+        const torso = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.6, 0.3), new THREE.MeshStandardMaterial({ color: c.color }));
+        torso.position.set(0, 0.85, 0.1);
+        aGroup.add(torso);
+
+        const head = new THREE.Mesh(new THREE.SphereGeometry(0.2, 16, 16), new THREE.MeshStandardMaterial({ color: 0xfbcfe8 }));
+        head.position.set(0, 1.3, 0.1);
+        aGroup.add(head);
+
+        const hit = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.8, 1.2), new THREE.MeshBasicMaterial({ visible: false }));
+        hit.position.y = 0.9;
+        hit.userData = { type: 'character', id: c.id };
+        aGroup.add(hit);
+        interactiveObjects.push(hit);
+
+        characterMeshes[c.id] = { group: aGroup, head: head, torso: torso, root: aGroup, baseY: 0.85 };
+        scene.add(aGroup);
+      });
+    }
+
+    /* ========================================================================= */
+    /* 4. THE CORNER BOOTH • WHISPER NOOK (Intimate 2-3 Person Breakout)         */
+    /* ========================================================================= */
+    function buildCornerBooth() {
+      document.getElementById('roomTitle').innerText = 'CORNER BOOTH • WHISPER NOOK';
+      scene.background.set(0x0e0906);
+      scene.fog.color.set(0x0e0906);
+
+      const ambient = new THREE.AmbientLight(0x381e0e, 0.9);
+      scene.add(ambient);
+
+      // Warm overhead Tiffany stained pendant
+      const overheadLight = new THREE.SpotLight(0xffbe5b, 3.5, 10, Math.PI / 3.5, 0.4, 1);
+      overheadLight.position.set(0, 3.8, 0);
+      overheadLight.target.position.set(0, 0.8, 0);
+      overheadLight.castShadow = true;
+      scene.add(overheadLight);
+      scene.add(overheadLight.target);
+
+      // Cord & Tiffany Shade
+      const wire = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 1.4, 8), new THREE.MeshBasicMaterial({ color: 0x111111 }));
+      wire.position.set(0, 4.3, 0);
+      scene.add(wire);
+
+      const shade = new THREE.Mesh(new THREE.ConeGeometry(0.55, 0.4, 16, 1, true), new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.3, side: THREE.DoubleSide }));
+      shade.position.set(0, 3.6, 0);
+      scene.add(shade);
+
+      // Floor
+      const floor = new THREE.Mesh(new THREE.PlaneGeometry(20, 16), new THREE.MeshStandardMaterial({ color: 0x1b1109, roughness: 0.4 }));
+      floor.rotation.x = -Math.PI / 2;
+      floor.receiveShadow = true;
+      scene.add(floor);
+
+      // Corner Wood Paneling Walls
+      const backWall = new THREE.Mesh(new THREE.PlaneGeometry(16, 9), new THREE.MeshStandardMaterial({ color: 0x170d07, roughness: 0.8 }));
+      backWall.position.set(0, 4.5, -3.2);
+      backWall.receiveShadow = true;
+      scene.add(backWall);
+
+      const leftWall = new THREE.Mesh(new THREE.PlaneGeometry(16, 9), new THREE.MeshStandardMaterial({ color: 0x140b06, roughness: 0.8 }));
+      leftWall.rotation.y = Math.PI / 2;
+      leftWall.position.set(-4.5, 4.5, 0);
+      leftWall.receiveShadow = true;
+      scene.add(leftWall);
+
+      // Tufted Emerald / Burgundy Velvet L-Banquette Seat
+      const backBanquette = new THREE.Mesh(new THREE.BoxGeometry(5.2, 1.4, 0.6), new THREE.MeshStandardMaterial({ color: 0x064e3b, roughness: 0.7 }));
+      backBanquette.position.set(-0.6, 1.1, -1.8);
+      backBanquette.castShadow = true;
+      scene.add(backBanquette);
+
+      const backSeat = new THREE.Mesh(new THREE.BoxGeometry(5.2, 0.45, 1.2), new THREE.MeshStandardMaterial({ color: 0x047857, roughness: 0.6 }));
+      backSeat.position.set(-0.6, 0.45, -1.2);
+      backSeat.receiveShadow = true;
+      scene.add(backSeat);
+
+      const leftBanquette = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.4, 3.6), new THREE.MeshStandardMaterial({ color: 0x064e3b, roughness: 0.7 }));
+      leftBanquette.position.set(-3.0, 1.1, 0.6);
+      leftBanquette.castShadow = true;
+      scene.add(leftBanquette);
+
+      const leftSeat = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.45, 3.6), new THREE.MeshStandardMaterial({ color: 0x047857, roughness: 0.6 }));
+      leftSeat.position.set(-2.4, 0.45, 0.6);
+      leftSeat.receiveShadow = true;
+      scene.add(leftSeat);
+
+      // Polished Dark Mahogany Dining/Banter Table
+      const tableTop = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.12, 2.0), new THREE.MeshStandardMaterial({ color: 0x2e180d, roughness: 0.25, metalness: 0.1 }));
+      tableTop.position.set(-0.4, 0.95, -0.2);
+      tableTop.castShadow = true;
+      tableTop.receiveShadow = true;
+      scene.add(tableTop);
+
+      const tableLeg1 = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.12, 0.9, 12), new THREE.MeshStandardMaterial({ color: 0x120a05 }));
+      tableLeg1.position.set(-1.4, 0.45, -0.8);
+      scene.add(tableLeg1);
+
+      const tableLeg2 = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.12, 0.9, 12), new THREE.MeshStandardMaterial({ color: 0x120a05 }));
+      tableLeg2.position.set(0.6, 0.45, 0.4);
+      scene.add(tableLeg2);
+
+      // Candle on Table with Flickering PointLight
+      const candleMat = new THREE.MeshStandardMaterial({ color: 0xfffbeb, roughness: 0.3 });
+      const candle = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.18, 12), candleMat);
+      candle.position.set(-0.8, 1.05, -0.4);
+      scene.add(candle);
+
+      const flame = new THREE.Mesh(new THREE.ConeGeometry(0.03, 0.08, 8), new THREE.MeshBasicMaterial({ color: 0xf59e0b }));
+      flame.position.set(-0.8, 1.18, -0.4);
+      scene.add(flame);
+
+      const candleLight = new THREE.PointLight(0xff9900, 1.2, 3);
+      candleLight.position.set(-0.8, 1.2, -0.4);
+      scene.add(candleLight);
+
+      // 3D Leather-Bound Thread Journal / Tangent Book on Table
+      const bookGroup = new THREE.Group();
+      bookGroup.position.set(0.2, 1.03, 0.1);
+      bookGroup.rotation.y = 0.2;
+
+      const bookCover = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.05, 0.95), new THREE.MeshStandardMaterial({ color: 0x7c2d12, roughness: 0.5 }));
+      bookGroup.add(bookCover);
+
+      const pages = new THREE.Mesh(new THREE.BoxGeometry(0.66, 0.04, 0.9), new THREE.MeshStandardMaterial({ color: 0xfef08a, emissive: 0xd97706, emissiveIntensity: 0.25, roughness: 0.9 }));
+      pages.position.y = 0.02;
+      bookGroup.add(pages);
+
+      const ribbon = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.015, 0.98), new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.8, roughness: 0.2 }));
+      ribbon.position.y = 0.045;
+      bookGroup.add(ribbon);
+
+      const bookHit = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.4, 1.2), new THREE.MeshBasicMaterial({ visible: false }));
+      bookHit.userData = { type: 'journal' };
+      bookGroup.add(bookHit);
+      interactiveObjects.push(bookHit);
+
+      scene.add(bookGroup);
+
+      // Two Coffee/Whiskey Glasses on Table
+      const glass1 = createDrinkProp('scotch');
+      glass1.position.set(-0.3, 1.05, -0.6);
+      scene.add(glass1);
+
+      const glass2 = createDrinkProp('coffee');
+      glass2.position.set(0.5, 1.05, -0.5);
+      scene.add(glass2);
+
+      buildBoothCharacters();
+    }
+
+    function buildBoothCharacters() {
+      const participants = [
+        { id: "badri", x: -0.6, z: -1.1, rot: 0.1, color: 0x38bdf8 },
+        { id: "dave", x: 1.0, z: -0.4, rot: -Math.PI * 0.45, color: 0x10b981 }
+      ];
+
+      participants.forEach(p => {
+        if (currentDenState) {
+          const u = currentDenState.users.find(usr => usr.id === p.id);
+          if (u && u.avatar_config) {
+            p.color = parseInt(u.avatar_config.outfit_color.replace("#", "0x"));
+          }
+        }
+
+        const bGroup = new THREE.Group();
+        bGroup.position.set(p.x, 0, p.z);
+        bGroup.rotation.y = p.rot;
+
+        const torso = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.65, 0.35), new THREE.MeshStandardMaterial({ color: p.color }));
+        torso.position.y = 0.95;
+        bGroup.add(torso);
+
+        const head = new THREE.Mesh(new THREE.SphereGeometry(0.22, 16, 16), new THREE.MeshStandardMaterial({ color: 0xfbcfe8 }));
+        head.position.y = 1.4;
+        bGroup.add(head);
+
+        const hit = new THREE.Mesh(new THREE.BoxGeometry(0.9, 1.6, 0.9), new THREE.MeshBasicMaterial({ visible: false }));
+        hit.position.y = 1.0;
+        hit.userData = { type: 'character', id: p.id };
+        bGroup.add(hit);
+        interactiveObjects.push(hit);
+
+        characterMeshes[p.id] = { group: bGroup, head: head, torso: torso, root: bGroup, baseY: 0.95 };
+        scene.add(bGroup);
+      });
+    }
+
+    /* ========================================================================= */
+    /* 5. PROCEDURAL 3D CUSTOM DEN COMPILER (Prompt & Photo Synthesis)           */
+    /* ========================================================================= */
+    function buildProceduralRoom(layout) {
+      if (!layout) return;
+      activeCustomLayout = layout;
+      document.getElementById('roomTitle').innerText = (layout.name || 'CUSTOM FAMILIAR DEN').toUpperCase();
+
+      const pal = layout.palette || {};
+      const bgColor = parseInt((pal.background_color || '#0a0705').replace('#', '0x'), 16);
+      scene.background.set(bgColor);
+      scene.fog.color.set(bgColor);
+
+      // Procedural Lights
+      const lights = layout.lighting || [];
+      if (lights.length === 0) {
+        scene.add(new THREE.AmbientLight(0x2a170d, 1.0));
+        const defPt = new THREE.PointLight(0xffbe5b, 2.2, 14);
+        defPt.position.set(0, 3.8, 0.5);
+        scene.add(defPt);
+      } else {
+        lights.forEach(l => {
+          const lColor = parseInt((l.color || '#ffffff').replace('#', '0x'), 16);
+          if (l.type === 'ambient') {
+            scene.add(new THREE.AmbientLight(lColor, l.intensity || 1.0));
+          } else {
+            const pt = new THREE.PointLight(lColor, l.intensity || 2.0, l.distance || 14.0);
+            pt.position.set(l.position[0] || 0, l.position[1] || 3.5, l.position[2] || 0);
+            pt.castShadow = true;
+            scene.add(pt);
+          }
+        });
+      }
+
+      // Procedural Floor
+      const floorColor = parseInt((pal.floor_color || '#1f1d1b').replace('#', '0x'), 16);
+      let fRoughness = 0.45, fMetalness = 0.05;
+      if (pal.floor_type === 'concrete') { fRoughness = 0.9; fMetalness = 0.1; }
+      else if (pal.floor_type === 'slate_tile') { fRoughness = 0.3; fMetalness = 0.2; }
+      else if (pal.floor_type === 'tatami') { fRoughness = 0.85; fMetalness = 0.02; }
+      else if (pal.floor_type === 'carpet') { fRoughness = 0.95; fMetalness = 0.0; }
+
+      const floorGeo = new THREE.PlaneGeometry(24, 18);
+      const floorMat = new THREE.MeshStandardMaterial({
+        color: floorColor,
+        roughness: fRoughness,
+        metalness: fMetalness
+      });
+      const floor = new THREE.Mesh(floorGeo, floorMat);
+      floor.rotation.x = -Math.PI / 2;
+      floor.receiveShadow = true;
+      scene.add(floor);
+
+      // Procedural Enclosing Walls
+      const wallColor = parseInt((pal.wall_color || '#1c1008').replace('#', '0x'), 16);
+      let wallMat;
+      if (pal.wall_type === 'glass_greenhouse') {
+        wallMat = new THREE.MeshStandardMaterial({
+          color: wallColor,
+          roughness: 0.1,
+          metalness: 0.85,
+          transparent: true,
+          opacity: 0.55
+        });
+      } else {
+        wallMat = new THREE.MeshStandardMaterial({
+          color: wallColor,
+          roughness: 0.85,
+          metalness: 0.05
+        });
+      }
+
+      const backWall = new THREE.Mesh(new THREE.PlaneGeometry(24, 12), wallMat);
+      backWall.position.set(0, 5, -3.4);
+      backWall.receiveShadow = true;
+      scene.add(backWall);
+
+      const leftWall = new THREE.Mesh(new THREE.PlaneGeometry(18, 12), wallMat);
+      leftWall.rotation.y = Math.PI / 2;
+      leftWall.position.set(-6.8, 5, 0);
+      leftWall.receiveShadow = true;
+      scene.add(leftWall);
+
+      const rightWall = new THREE.Mesh(new THREE.PlaneGeometry(18, 12), wallMat);
+      rightWall.rotation.y = -Math.PI / 2;
+      rightWall.position.set(6.8, 5, 0);
+      rightWall.receiveShadow = true;
+      scene.add(rightWall);
+
+      if (pal.wall_type === 'glass_greenhouse') {
+        for (let x = -5.5; x <= 5.5; x += 2.2) {
+          const mullion = new THREE.Mesh(new THREE.BoxGeometry(0.08, 10, 0.08), new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.8, roughness: 0.3 }));
+          mullion.position.set(x, 5, -3.35);
+          scene.add(mullion);
+        }
+      }
+
+      // Procedural Props
+      (layout.props || []).forEach(p => {
+        buildProceduralProp(p, pal);
+      });
+
+      // Procedural Seats & Avatars
+      (layout.seats || []).forEach(s => {
+        buildProceduralSeat(s);
+      });
+
+      // Soundscape Triggering
+      if (layout.soundscape === 'rain') {
+        sounds.toggleRain(true);
+      } else if (layout.soundscape === 'cedar_fire') {
+        sounds.toggleFire(true);
+      }
+
+      initParticles();
+    }
+
+    function buildProceduralProp(prop, pal) {
+      const pos = prop.position || [0, 0, 0];
+      const scale = prop.scale || [1, 1, 1];
+      const pColorHex = prop.color || pal.accent_color || '#f59e0b';
+      const pColor = parseInt(pColorHex.replace('#', '0x'), 16);
+
+      if (prop.type === 'amp_stack') {
+        const ampGroup = new THREE.Group();
+        ampGroup.position.set(pos[0], pos[1], pos[2]);
+        ampGroup.scale.set(scale[0], scale[1], scale[2]);
+
+        const cabLow = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.1, 0.65), new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.8 }));
+        cabLow.position.y = 0.55;
+        cabLow.castShadow = true;
+        ampGroup.add(cabLow);
+
+        const grilleLow = new THREE.Mesh(new THREE.PlaneGeometry(1.05, 0.95), new THREE.MeshStandardMaterial({ color: 0x52525b, roughness: 0.9 }));
+        grilleLow.position.set(0, 0.55, 0.33);
+        ampGroup.add(grilleLow);
+
+        const cabUp = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.1, 0.65), new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.8 }));
+        cabUp.position.y = 1.7;
+        cabUp.castShadow = true;
+        ampGroup.add(cabUp);
+
+        const grilleUp = new THREE.Mesh(new THREE.PlaneGeometry(1.05, 0.95), new THREE.MeshStandardMaterial({ color: 0x52525b, roughness: 0.9 }));
+        grilleUp.position.set(0, 1.7, 0.33);
+        ampGroup.add(grilleUp);
+
+        const head = new THREE.Mesh(new THREE.BoxGeometry(1.15, 0.45, 0.55), new THREE.MeshStandardMaterial({ color: 0x09090b, roughness: 0.6 }));
+        head.position.y = 2.48;
+        head.castShadow = true;
+        ampGroup.add(head);
+
+        const faceplate = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 0.35), new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.85, roughness: 0.25 }));
+        faceplate.position.set(0, 2.48, 0.28);
+        ampGroup.add(faceplate);
+
+        const jewel = new THREE.Mesh(new THREE.SphereGeometry(0.035, 12, 12), new THREE.MeshBasicMaterial({ color: 0xef4444 }));
+        jewel.position.set(0.42, 2.48, 0.29);
+        ampGroup.add(jewel);
+
+        scene.add(ampGroup);
+      } else if (prop.type === 'plants') {
+        const pGroup = new THREE.Group();
+        pGroup.position.set(pos[0], pos[1], pos[2]);
+        pGroup.scale.set(scale[0], scale[1], scale[2]);
+
+        const pot = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.25, 0.65, 16), new THREE.MeshStandardMaterial({ color: 0x9a3412, roughness: 0.8 }));
+        pot.position.y = 0.33;
+        pot.castShadow = true;
+        pGroup.add(pot);
+
+        const soil = new THREE.Mesh(new THREE.CylinderGeometry(0.33, 0.33, 0.05, 16), new THREE.MeshStandardMaterial({ color: 0x1c1917, roughness: 0.95 }));
+        soil.position.y = 0.64;
+        pGroup.add(soil);
+
+        const leafColors = [0x15803d, 0x166534, 0x22c55e, 0x14532d];
+        for (let i = 0; i < 5; i++) {
+          const leafMat = new THREE.MeshStandardMaterial({ color: leafColors[i % leafColors.length], roughness: 0.4 });
+          const foliage = new THREE.Mesh(new THREE.SphereGeometry(0.25 + (i * 0.04), 12, 12), leafMat);
+          const angle = (i / 5) * Math.PI * 2;
+          foliage.position.set(Math.cos(angle) * 0.22, 0.8 + (i * 0.15), Math.sin(angle) * 0.22);
+          foliage.castShadow = true;
+          pGroup.add(foliage);
+        }
+
+        scene.add(pGroup);
+      } else if (prop.type === 'neon_sign') {
+        const nGroup = new THREE.Group();
+        nGroup.position.set(pos[0], pos[1], pos[2]);
+        nGroup.scale.set(scale[0], scale[1], scale[2]);
+
+        const frame = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.9, 0.08), new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.9 }));
+        frame.position.y = 0;
+        nGroup.add(frame);
+
+        const tubeMat = new THREE.MeshStandardMaterial({
+          color: pColor,
+          emissive: pColor,
+          emissiveIntensity: 0.95,
+          roughness: 0.2
+        });
+        const tube1 = new THREE.Mesh(new THREE.BoxGeometry(2.1, 0.12, 0.06), tubeMat);
+        tube1.position.set(0, 0.2, 0.06);
+        nGroup.add(tube1);
+
+        const tube2 = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.12, 0.06), tubeMat);
+        tube2.position.set(0, -0.2, 0.06);
+        nGroup.add(tube2);
+
+        const nLight = new THREE.PointLight(pColor, 1.8, 8);
+        nLight.position.set(0, 0, 0.4);
+        nGroup.add(nLight);
+
+        scene.add(nGroup);
+      } else if (prop.type === 'arcade_cabinet') {
+        const aGroup = new THREE.Group();
+        aGroup.position.set(pos[0], pos[1], pos[2]);
+        aGroup.scale.set(scale[0], scale[1], scale[2]);
+
+        const cab = new THREE.Mesh(new THREE.BoxGeometry(1.1, 2.3, 0.9), new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.6 }));
+        cab.position.y = 1.15;
+        cab.castShadow = true;
+        aGroup.add(cab);
+
+        const marquee = new THREE.Mesh(new THREE.PlaneGeometry(0.95, 0.3), new THREE.MeshStandardMaterial({ color: 0xec4899, emissive: 0xdb2777, emissiveIntensity: 0.8 }));
+        marquee.position.set(0, 2.15, 0.46);
+        aGroup.add(marquee);
+
+        const screen = new THREE.Mesh(new THREE.PlaneGeometry(0.85, 0.65), new THREE.MeshStandardMaterial({ color: 0x06b6d4, emissive: 0x0891b2, emissiveIntensity: 0.7 }));
+        screen.position.set(0, 1.45, 0.46);
+        aGroup.add(screen);
+
+        const ctrl = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.12, 0.4), new THREE.MeshStandardMaterial({ color: 0x1e293b }));
+        ctrl.position.set(0, 0.95, 0.52);
+        aGroup.add(ctrl);
+
+        const stick = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.12, 8), new THREE.MeshStandardMaterial({ color: 0xd4d4d8, metalness: 0.9 }));
+        stick.position.set(-0.2, 1.05, 0.52);
+        aGroup.add(stick);
+
+        const ball = new THREE.Mesh(new THREE.SphereGeometry(0.04, 12, 12), new THREE.MeshBasicMaterial({ color: 0xef4444 }));
+        ball.position.set(-0.2, 1.12, 0.52);
+        aGroup.add(ball);
+
+        scene.add(aGroup);
+      } else if (prop.type === 'record_player') {
+        const rpGroup = new THREE.Group();
+        rpGroup.position.set(pos[0], pos[1], pos[2]);
+        rpGroup.scale.set(scale[0], scale[1], scale[2]);
+
+        const plinth = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.14, 0.7), new THREE.MeshStandardMaterial({ color: 0x3e2312, roughness: 0.35 }));
+        plinth.position.y = 0.07;
+        plinth.castShadow = true;
+        rpGroup.add(plinth);
+
+        const disc = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.28, 0.02, 24), new THREE.MeshStandardMaterial({ color: 0x09090b, roughness: 0.2, metalness: 0.4 }));
+        disc.position.set(-0.06, 0.15, 0);
+        rpGroup.add(disc);
+        vinylDiscMesh = disc;
+
+        const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.01, 0.01, 0.26, 8), new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.9, roughness: 0.2 }));
+        arm.rotation.z = Math.PI / 4;
+        arm.position.set(0.22, 0.18, -0.05);
+        rpGroup.add(arm);
+
+        const jHit = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.4, 0.9), new THREE.MeshBasicMaterial({ visible: false }));
+        jHit.userData = { type: 'jukebox' };
+        rpGroup.add(jHit);
+        interactiveObjects.push(jHit);
+
+        scene.add(rpGroup);
+      } else if (prop.type === 'hearth') {
+        const hGroup = new THREE.Group();
+        hGroup.position.set(pos[0], pos[1], pos[2]);
+        hGroup.scale.set(scale[0], scale[1], scale[2]);
+
+        const stone = new THREE.Mesh(new THREE.BoxGeometry(3.6, 5.0, 1.2), new THREE.MeshStandardMaterial({ color: 0x332218, roughness: 0.95 }));
+        stone.position.y = 2.5;
+        stone.castShadow = true;
+        stone.receiveShadow = true;
+        hGroup.add(stone);
+
+        const cav = new THREE.Mesh(new THREE.BoxGeometry(2.2, 1.5, 0.8), new THREE.MeshBasicMaterial({ color: 0x050302 }));
+        cav.position.set(0, 0.85, 0.3);
+        hGroup.add(cav);
+
+        const log = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 1.2, 10), new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.8 }));
+        log.rotation.z = Math.PI / 2;
+        log.position.set(0, 0.22, 0.35);
+        hGroup.add(log);
+
+        const flame = new THREE.Mesh(new THREE.ConeGeometry(0.35, 0.75, 8), new THREE.MeshBasicMaterial({ color: 0xff7700 }));
+        flame.position.set(0, 0.55, 0.35);
+        hGroup.add(flame);
+
+        const fLight = new THREE.PointLight(0xff6611, 3.2, 10);
+        fLight.position.set(0, 1.1, 0.6);
+        fLight.castShadow = true;
+        hGroup.add(fLight);
+
+        const hHit = new THREE.Mesh(new THREE.BoxGeometry(3.6, 2.5, 1.4), new THREE.MeshBasicMaterial({ visible: false }));
+        hHit.position.y = 1.25;
+        hHit.userData = { type: 'hearth' };
+        hGroup.add(hHit);
+        interactiveObjects.push(hHit);
+
+        scene.add(hGroup);
+      } else if (prop.type === 'coffee_table') {
+        const ctGroup = new THREE.Group();
+        ctGroup.position.set(pos[0], pos[1], pos[2]);
+        ctGroup.scale.set(scale[0], scale[1], scale[2]);
+
+        const top = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.08, 1.2), new THREE.MeshStandardMaterial({ color: 0x3d2011, roughness: 0.3 }));
+        top.position.y = 0.5;
+        top.castShadow = true;
+        top.receiveShadow = true;
+        ctGroup.add(top);
+
+        const legGeo = new THREE.CylinderGeometry(0.04, 0.04, 0.5, 8);
+        const legMat = new THREE.MeshStandardMaterial({ color: 0x180b05 });
+        [[-0.85, -0.45], [0.85, -0.45], [-0.85, 0.45], [0.85, 0.45]].forEach(([lx, lz]) => {
+          const leg = new THREE.Mesh(legGeo, legMat);
+          leg.position.set(lx, 0.25, lz);
+          ctGroup.add(leg);
+        });
+
+        const mug = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.12, 12), new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.2 }));
+        mug.position.set(-0.25, 0.6, 0.1);
+        ctGroup.add(mug);
+
+        scene.add(ctGroup);
+      } else if (prop.type === 'rug') {
+        const rugGeo = new THREE.PlaneGeometry(scale[0] || 4.5, scale[2] || 2.8);
+        const rugMat = new THREE.MeshStandardMaterial({ color: pColor, roughness: 0.95 });
+        const rug = new THREE.Mesh(rugGeo, rugMat);
+        rug.rotation.x = -Math.PI / 2;
+        rug.position.set(pos[0], pos[1] || 0.015, pos[2]);
+        rug.receiveShadow = true;
+        scene.add(rug);
+      }
+    }
+
+    function buildProceduralSeat(seat) {
+      const sGroup = new THREE.Group();
+      const pos = seat.position || [0, 0, 0];
+      sGroup.position.set(pos[0], pos[1], pos[2]);
+      sGroup.rotation.y = seat.rotation_y || 0;
+
+      const chairColor = parseInt((seat.color || '#3b82f6').replace('#', '0x'), 16);
+
+      if (seat.seat_type === 'armchair') {
+        const cushion = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.28, 0.9), new THREE.MeshStandardMaterial({ color: 0x2b150c, roughness: 0.6 }));
+        cushion.position.y = 0.45;
+        cushion.castShadow = true;
+        sGroup.add(cushion);
+
+        const back = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.85, 0.22), new THREE.MeshStandardMaterial({ color: 0x3d2011, roughness: 0.6 }));
+        back.position.set(0, 0.9, -0.36);
+        back.castShadow = true;
+        sGroup.add(back);
+
+        const armGeo = new THREE.BoxGeometry(0.18, 0.5, 0.88);
+        const armMat = new THREE.MeshStandardMaterial({ color: 0x3d2011, roughness: 0.5 });
+        const armL = new THREE.Mesh(armGeo, armMat);
+        armL.position.set(-0.48, 0.65, 0);
+        sGroup.add(armL);
+
+        const armR = new THREE.Mesh(armGeo, armMat);
+        armR.position.set(0.48, 0.65, 0);
+        sGroup.add(armR);
+      } else if (seat.seat_type === 'floor_cushion') {
+        const cushion = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.52, 0.18, 16), new THREE.MeshStandardMaterial({ color: chairColor, roughness: 0.8 }));
+        cushion.position.y = 0.09;
+        cushion.castShadow = true;
+        sGroup.add(cushion);
+      } else if (seat.seat_type === 'wicker_chair') {
+        const seatPan = new THREE.Mesh(new THREE.CylinderGeometry(0.44, 0.4, 0.08, 16), new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.9 }));
+        seatPan.position.y = 0.46;
+        sGroup.add(seatPan);
+
+        const hoop = new THREE.Mesh(new THREE.TorusGeometry(0.42, 0.04, 8, 16, Math.PI), new THREE.MeshStandardMaterial({ color: 0x542307, roughness: 0.7 }));
+        hoop.rotation.x = Math.PI / 2;
+        hoop.position.set(0, 0.88, -0.15);
+        sGroup.add(hoop);
+      } else {
+        const seatPan = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.38, 0.1, 16), new THREE.MeshStandardMaterial({ color: 0x3f1f10, roughness: 0.5 }));
+        seatPan.position.y = 0.55;
+        sGroup.add(seatPan);
+      }
+
+      // Seated Avatar Character
+      let avatarOutfitHex = seat.color || '#38bdf8';
+      let avatarSkinHex = '#fbcfe8';
+      let hairStyle = 'beanie';
+      let hairColor = '#1c1917';
+
+      if (currentDenState && currentDenState.users) {
+        const u = currentDenState.users.find(usr => usr.id === seat.user_id);
+        if (u && u.avatar_config) {
+          avatarOutfitHex = u.avatar_config.outfit_color || avatarOutfitHex;
+          avatarSkinHex = u.avatar_config.skin_tone || avatarSkinHex;
+          hairStyle = u.avatar_config.hair_style || hairStyle;
+          hairColor = u.avatar_config.hair_color || hairColor;
+        }
+      }
+
+      const avatarOutfit = parseInt(avatarOutfitHex.replace('#', '0x'), 16);
+      const avatarSkin = parseInt(avatarSkinHex.replace('#', '0x'), 16);
+      const avatarHair = parseInt(hairColor.replace('#', '0x'), 16);
+
+      const isFloor = seat.seat_type === 'floor_cushion';
+      const torsoY = isFloor ? 0.48 : 0.88;
+      const headY = isFloor ? 0.92 : 1.32;
+
+      const torso = new THREE.Mesh(new THREE.BoxGeometry(0.56, 0.62, 0.32), new THREE.MeshStandardMaterial({ color: avatarOutfit, roughness: 0.6 }));
+      torso.position.set(0, torsoY, 0);
+      torso.castShadow = true;
+      sGroup.add(torso);
+
+      const head = new THREE.Mesh(new THREE.SphereGeometry(0.2, 16, 16), new THREE.MeshStandardMaterial({ color: avatarSkin, roughness: 0.5 }));
+      head.position.set(0, headY, 0);
+      head.castShadow = true;
+      sGroup.add(head);
+
+      if (hairStyle === 'cap') {
+        const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.21, 0.22, 0.1, 12), new THREE.MeshStandardMaterial({ color: avatarHair }));
+        cap.position.set(0, headY + 0.12, 0);
+        sGroup.add(cap);
+
+        const brim = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.02, 0.18), new THREE.MeshStandardMaterial({ color: avatarHair }));
+        brim.position.set(0, headY + 0.08, 0.18);
+        sGroup.add(brim);
+      } else if (hairStyle === 'beanie') {
+        const beanie = new THREE.Mesh(new THREE.SphereGeometry(0.22, 12, 12, 0, Math.PI * 2, 0, Math.PI / 2), new THREE.MeshStandardMaterial({ color: avatarHair }));
+        beanie.position.set(0, headY + 0.05, 0);
+        sGroup.add(beanie);
+      } else {
+        const hair = new THREE.Mesh(new THREE.SphereGeometry(0.22, 12, 12), new THREE.MeshStandardMaterial({ color: avatarHair, roughness: 0.9 }));
+        hair.position.set(0, headY + 0.04, -0.04);
+        sGroup.add(hair);
+      }
+
+      const hit = new THREE.Mesh(new THREE.BoxGeometry(1.1, 1.8, 1.1), new THREE.MeshBasicMaterial({ visible: false }));
+      hit.position.y = torsoY;
+      hit.userData = { type: 'character', id: seat.user_id };
+      sGroup.add(hit);
+      interactiveObjects.push(hit);
+
+      characterMeshes[seat.user_id] = { group: sGroup, head: head, torso: torso, root: sGroup, baseY: headY };
+      scene.add(sGroup);
+    }
+
+    function initParticles() {
+      const count = 60;
+      const geo = new THREE.BufferGeometry();
+      const pos = new Float32Array(count * 3);
+      for (let i = 0; i < count * 3; i += 3) {
+        pos[i] = (Math.random() - 0.5) * 12;
+        pos[i + 1] = Math.random() * 4.5;
+        pos[i + 2] = (Math.random() - 0.5) * 6;
+      }
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      const mat = new THREE.PointsMaterial({ color: 0xfde68a, size: 0.04, transparent: true, opacity: 0.5 });
+      const points = new THREE.Points(geo, mat);
+      scene.add(points);
+      particleSystems.push(points);
+    }
+
+    function lerp(a, b, t) {
+      return a + (b - a) * t;
+    }
+
+    /* Animation Loop */
+    let clock = new THREE.Clock();
+    function animate() {
+      requestAnimationFrame(animate);
+      const delta = clock.getDelta();
+      const time = clock.getElapsedTime();
+
+      // Subtle Camera Float Parallax
+      camera.position.x = lerp(camera.position.x, mouseNormalized.x * 0.4, 0.05);
+      camera.position.y = lerp(camera.position.y, 3.8 + mouseNormalized.y * 0.25, 0.05);
+      camera.lookAt(0, 1.2, 0);
+
+      if (vinylDiscMesh) {
+        vinylDiscMesh.rotation.y += 0.03;
+      }
+
+      if (dogMesh) {
+        dogMesh.scale.x = 1.0 + Math.sin(time * 2.2) * 0.05;
+        dogMesh.scale.y = 1.0 + Math.sin(time * 2.2) * 0.04;
+      }
+
+      Object.entries(characterMeshes).forEach(([id, obj]) => {
+        if (obj && obj.head) {
+          obj.head.position.y = (currentRoom === 'bar' ? 1.05 : currentRoom === 'poker' ? 1.55 : 1.3) + Math.sin(time * 2.0 + id.charCodeAt(0)) * 0.02;
+        }
+      });
+
+      particleSystems.forEach(ps => {
+        const positions = ps.geometry.attributes.position.array;
+        for (let i = 1; i < positions.length; i += 3) {
+          positions[i] += 0.005;
+          if (positions[i] > 5) positions[i] = 0;
+        }
+        ps.geometry.attributes.position.needsUpdate = true;
+      });
+
+      updateSpeechBubblePosition();
+      renderer.render(scene, camera);
+    }
+
+    /* Interaction Handling */
+    function onCanvasClick(e) {
+      if (e.target.closest('.spatial-speech-bubble') || e.target.closest('.ledger-drawer') || e.target.closest('.modal-card') || e.target.closest('.blueprints-modal-card')) {
+        return;
+      }
+
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObjects(interactiveObjects, true);
+
+      if (intersects.length > 0) {
+        let target = intersects[0].object;
+        while (target && !target.userData.type && target.parent) {
+          target = target.parent;
+        }
+        const data = target.userData;
+
+        if (data.type === 'character') {
+          selectCharacter(data.id);
+        } else if (data.type === 'journal') {
+          sounds.playNeedleDrop();
+          openTangentModal();
+        } else if (data.type === 'jukebox') {
+          sounds.playNeedleDrop();
+          openJukeboxModal();
+        } else if (data.type === 'chalkboard') {
+          toggleLedger();
+        } else if (data.type === 'dice') {
+          rollDiceAnimation();
+        } else if (data.type === 'dog') {
+          sounds.playDogWhimper();
+          alert("🐕 Byte wagged his tail and curled back up on the rug!");
+        } else if (data.type === 'empty_chair') {
+          openChairModal();
+        } else if (data.type === 'hearth') {
+          sounds.playWoodThud();
+          openHearthModal();
+        }
+      } else {
+        closeSpeechBubble();
+      }
+    }
+
+    function selectCharacter(userId) {
+      activeSelectedUserId = userId;
+      sounds.playGlassClink();
+
+      if (!currentDenState) return;
+      const user = currentDenState.users.find(u => u.id === userId);
+      const sp = currentDenState.spotify_streams[userId] || { track_name: "Nothing right now", artist: "" };
+      const lb = currentDenState.letterboxd_streams[userId] || { title: "No recent film", rating: 0, review_snippet: "" };
+
+      document.getElementById('bName').innerText = user.name;
+      document.getElementById('bMeta').innerText = `${user.location} • ${user.timezone}`;
+      document.getElementById('bStatus').innerText = user.status_text || "Relaxing in the Den";
+      document.getElementById('bMusic').innerText = `🎵 ${sp.track_name} — ${sp.artist}`;
+      document.getElementById('bMovie').innerText = lb.title !== "No recent film" ? `🎬 ${lb.title} (${lb.rating}★): "${lb.review_snippet}"` : "🎬 No recent film logged";
+
+      // Temporal Echo / Room Residue for Offline or Departed Friends
+      const resContainer = document.getElementById('bResidue');
+      const residue = (currentDenState.room_residues || []).find(r => r.friend_id === userId);
+      if (residue && resContainer) {
+        resContainer.innerHTML = `
+          <div style="background: rgba(217, 119, 6, 0.18); border: 1px dashed #d97706; border-radius: 6px; padding: 6px 8px; margin-top: 8px; font-size: 11px;">
+            <div style="color: #fbbf24; font-weight: 700;">⏳ Departed ${residue.departed_at_label}</div>
+            <div style="color: #fef3c7; font-style: italic; margin-top: 2px;">"${residue.left_note}"</div>
+            <div style="color: #cbd5e1; font-size: 10px; margin-top: 3px;">Left behind: ${residue.last_action}</div>
+          </div>
+        `;
+        resContainer.style.display = 'block';
+      } else if (resContainer) {
+        resContainer.style.display = 'none';
+      }
+
+      const bubble = document.getElementById('avatarBubble');
+      bubble.style.display = 'block';
+      updateSpeechBubblePosition();
+    }
+
+    function stageAmmoForActiveUser() {
+      if (!activeSelectedUserId) return;
+      openSparringModal(activeSelectedUserId);
+      closeSpeechBubble();
+    }
+
+    function updateSpeechBubblePosition() {
+      if (!activeSelectedUserId || !characterMeshes[activeSelectedUserId]) {
+        document.getElementById('avatarBubble').style.display = 'none';
+        return;
+      }
+      const charObj = characterMeshes[activeSelectedUserId];
+      const headPos = new THREE.Vector3();
+      charObj.head.getWorldPosition(headPos);
+      headPos.y += 0.45;
+
+      headPos.project(camera);
+      const x = (headPos.x * 0.5 + 0.5) * window.innerWidth;
+      const y = (-(headPos.y * 0.5) + 0.5) * window.innerHeight;
+
+      const bubble = document.getElementById('avatarBubble');
+      bubble.style.left = `${x}px`;
+      bubble.style.top = `${y}px`;
+    }
+
+    function closeSpeechBubble() {
+      activeSelectedUserId = null;
+      document.getElementById('avatarBubble').style.display = 'none';
+    }
+
+    /* Actions */
+    async function clinkGlass() {
+      if (!activeSelectedUserId) return;
+      sounds.playGlassClink();
+      await fetch('/api/ember', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ from_user: 'badri', to_user: activeSelectedUserId })
+      });
+      alert(`🍻 Clink! Warm Ember dispatched to your friend's drink coaster.`);
+      closeSpeechBubble();
+    }
+
+    async function roastFriend() {
+      if (!activeSelectedUserId) return;
+      const msg = prompt(`Roast your buddy:`, "Who hurt you today?");
+      if (!msg) return;
+      await fetch('/api/roast', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ from_user: 'badri', target_user: activeSelectedUserId, message: msg })
+      });
+      closeSpeechBubble();
+    }
+
+    async function rollDiceAnimation() {
+      sounds.playDiceRoll();
+      if (diceMesh) {
+        diceMesh.rotation.x += Math.PI * 2;
+        diceMesh.rotation.z += Math.PI * 2;
+      }
+      await fetch('/api/game/roll', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ player_name: 'Badri' })
+      });
+    }
+
+    function selectRoom(roomName, btn) {
+      document.querySelectorAll('.scene-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      setupRoom(roomName);
+    }
+
+    function toggleLedger() {
+      const d = document.getElementById('ledgerDrawer');
+      d.style.display = d.style.display === 'block' ? 'none' : 'block';
+    }
+
+    /* Modals Control */
+    function openChairModal() {
+      document.getElementById('chairModal').style.display = 'flex';
+    }
+    function closeChairModal() {
+      document.getElementById('chairModal').style.display = 'none';
+    }
+
+    function openAvatarModal() {
+      sounds.playGlassClink();
+      loadUserAvatarConfig();
+      document.getElementById('avatarModal').style.display = 'flex';
+    }
+    function closeAvatarModal() {
+      document.getElementById('avatarModal').style.display = 'none';
+    }
+
+    function openFeedModal() {
+      sounds.playNeedleDrop();
+      loadUserFeedConfig();
+      document.getElementById('feedModal').style.display = 'flex';
+    }
+    function closeFeedModal() {
+      document.getElementById('feedModal').style.display = 'none';
+    }
+
+    function openJukeboxModal() {
+      if (!currentDenState) return;
+      const container = document.getElementById('jukeboxTracks');
+      container.innerHTML = Object.entries(currentDenState.spotify_streams).map(([uid, sp]) => {
+        const u = currentDenState.users.find(usr => usr.id === uid) || { name: uid };
+        return `
+          <div style="background: rgba(0,0,0,0.4); border: 1px solid #d97706; padding: 8px 12px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between;">
+            <div>
+              <div style="font-size: 12px; font-weight: 700; color: #fbbf24;">${u.name}: ${sp.track_name}</div>
+              <div style="font-size: 11px; color: #d6c7b2;">${sp.artist} — ${sp.album}</div>
+            </div>
+            <span style="font-size: 10px; color: ${sp.is_playing ? '#10b981' : '#94a3b8'}; font-weight: 700;">
+              ${sp.is_playing ? 'PLAYING NOW' : 'IDLE'}
+            </span>
+          </div>
+        `;
+      }).join('');
+      document.getElementById('jukeboxModal').style.display = 'flex';
+    }
+    function closeJukeboxModal() {
+      document.getElementById('jukeboxModal').style.display = 'none';
+    }
+
+    /* Swatch selection */
+    function selectOutfitColor(hex, btn) {
+      selectedOutfitHex = hex;
+      document.querySelectorAll('#outfitSwatches .swatch-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+    }
+
+    function selectSkinTone(hex, btn) {
+      selectedSkinHex = hex;
+      document.querySelectorAll('#skinSwatches .swatch-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+    }
+
+    function loadUserAvatarConfig() {
+      if (!currentDenState) return;
+      const uid = document.getElementById('avUserSelect').value;
+      const u = currentDenState.users.find(usr => usr.id === uid);
+      if (!u || !u.avatar_config) return;
+
+      const cfg = u.avatar_config;
+      selectedOutfitHex = cfg.outfit_color;
+      selectedSkinHex = cfg.skin_tone;
+      document.getElementById('avHairStyle').value = cfg.hair_style;
+      document.getElementById('avHairColor').value = cfg.hair_color;
+      document.getElementById('avDrink').value = cfg.drink;
+      document.getElementById('avAccessory').value = cfg.accessory;
+
+      // Update swatch active states
+      document.querySelectorAll('#outfitSwatches .swatch-btn').forEach(b => {
+        b.classList.toggle('active', b.style.backgroundColor === hexToRgb(selectedOutfitHex));
+      });
+      document.querySelectorAll('#skinSwatches .swatch-btn').forEach(b => {
+        b.classList.toggle('active', b.style.backgroundColor === hexToRgb(selectedSkinHex));
+      });
+    }
+
+    function hexToRgb(hex) {
+      const bigint = parseInt(hex.replace("#", ""), 16);
+      const r = (bigint >> 16) & 255;
+      const g = (bigint >> 8) & 255;
+      const b = bigint & 255;
+      return `rgb(${r}, ${g}, ${b})`;
+    }
+
+    async function saveAvatarConfig() {
+      const uid = document.getElementById('avUserSelect').value;
+      const payload = {
+        user_id: uid,
+        avatar_config: {
+          outfit_color: selectedOutfitHex,
+          skin_tone: selectedSkinHex,
+          hair_color: document.getElementById('avHairColor').value,
+          hair_style: document.getElementById('avHairStyle').value,
+          drink: document.getElementById('avDrink').value,
+          accessory: document.getElementById('avAccessory').value
+        }
+      };
+
+      const res = await fetch('/api/user/avatar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (data.success) {
+        sounds.playGlassClink();
+        setupRoom(currentRoom); // Re-render 3D scene with updated avatar
+        closeAvatarModal();
+      } else {
+        alert(data.error || "Failed to save avatar");
+      }
+    }
+
+    function loadUserFeedConfig() {
+      if (!currentDenState) return;
+      const uid = document.getElementById('feedUserSelect').value;
+      const u = currentDenState.users.find(usr => usr.id === uid) || {};
+      const sp = currentDenState.spotify_streams[uid] || {};
+      const lb = currentDenState.letterboxd_streams[uid] || {};
+      const gh = currentDenState.github_streams[uid] || {};
+
+      document.getElementById('feedStatus').value = u.status_text || '';
+      document.getElementById('feedSong').value = sp.track_name || '';
+      document.getElementById('feedArtist').value = sp.artist || '';
+      document.getElementById('feedPlaying').checked = sp.is_playing !== false;
+      document.getElementById('feedMovieTitle').value = lb.title || '';
+      document.getElementById('feedMovieRating').value = (lb.rating || 4.0).toFixed(1);
+      document.getElementById('feedMovieReview').value = lb.review_snippet || '';
+      document.getElementById('feedGitRepo').value = gh.repo || '';
+      document.getElementById('feedGitCommit').value = gh.commit_msg || '';
+    }
+
+    async function saveFeedConfig() {
+      const uid = document.getElementById('feedUserSelect').value;
+      const payload = {
+        user_id: uid,
+        custom_status: document.getElementById('feedStatus').value,
+        spotify_track: document.getElementById('feedSong').value,
+        spotify_artist: document.getElementById('feedArtist').value,
+        spotify_playing: document.getElementById('feedPlaying').checked,
+        letterboxd_title: document.getElementById('feedMovieTitle').value,
+        letterboxd_rating: parseFloat(document.getElementById('feedMovieRating').value),
+        letterboxd_review: document.getElementById('feedMovieReview').value,
+        github_repo: document.getElementById('feedGitRepo').value,
+        github_commit: document.getElementById('feedGitCommit').value
+      };
+
+      const res = await fetch('/api/user/feeds', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (data.success) {
+        sounds.playNeedleDrop();
+        closeFeedModal();
+      } else {
+        alert(data.error || "Failed to broadcast feed");
+      }
+    }
+
+    async function confirmChairPurchase() {
+      const name = document.getElementById('newFriendName').value;
+      const handle = document.getElementById('newFriendHandle').value;
+      if (!name || !handle) return;
+
+      const res = await fetch('/api/friends/add_test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ friend_name: name, friend_handle: handle })
+      });
+      const data = await res.json();
+      if (data.success) {
+        sounds.playGlassClink();
+        alert(`✓ Extra Chair unlocked for ${name}! ($3.99 billed once)`);
+        closeChairModal();
+        setupRoom(currentRoom);
+      } else {
+        alert(`⚠️ ${data.error}`);
+      }
+    }
+
+    /* ========================================================================= */
+    /* 5. BLUEPRINTS MASTER READER LOGIC                                         */
+    /* ========================================================================= */
+    let cachedArtifacts = {};
+    let activeArtifactName = null;
+
+    async function openBlueprintsModal() {
+      document.getElementById('blueprintsModal').style.display = 'flex';
+      sounds.playNeedleDrop();
+      await fetchArtifacts();
+    }
+
+    function closeBlueprintsModal() {
+      document.getElementById('blueprintsModal').style.display = 'none';
+    }
+
+    async function fetchArtifacts() {
+      try {
+        const res = await fetch('/api/artifacts');
+        const data = await res.json();
+        cachedArtifacts = data;
+        renderArtifactsSidebar();
+      } catch (err) {
+        console.error("Error fetching artifacts:", err);
+      }
+    }
+
+    function renderArtifactsSidebar() {
+      const sidebar = document.getElementById('artifactsSidebar');
+      const files = Object.keys(cachedArtifacts).sort();
+      if (files.length === 0) {
+        sidebar.innerHTML = '<div style="color:#94a3b8; font-size:12px; padding:10px;">No blueprints loaded.</div>';
+        return;
+      }
+
+      const friendlyTitles = {
+        'single_player_value_lucifer_audit.md': '🪵 Single-Player Value & Lucifer Audit',
+        'custom_den_layout_engine_design.md': '🎨 Custom Den Procedural Layout Engine',
+        'hackathon_battle_plan_and_pitch_strategy.md': '🏆 Hackathon Battle Plan & Pitch',
+        'business_analysis_and_vc_mentor_evaluation.md': '📊 Business Analysis & VC Evaluation',
+        'devils_advocate_teardown_and_reconstruction.md': '🔥 Lucifer vs Eric Barone Audit',
+        'business_and_product_strategy.md': '💎 Business & Product Strategy',
+        'competitor_analysis_and_defensibility.md': '🛡️ Competitor Moats & Defensibility',
+        'den_design_document.md': '🛋️ Den Architecture & Spatial Design',
+        'software_dev_plan_and_hackathon_blueprint.md': '⚡ Software Dev & Hackathon Blueprint',
+        'ai_agents_and_synthetic_banter_architecture.md': '🤖 AI Tangent Cartography & Audio Hub',
+        'network_expansion_and_curated_serendipity.md': '🌐 Network Expansion & Serendipity'
+      };
+
+      sidebar.innerHTML = files.map(f => {
+        const title = friendlyTitles[f] || f.replace('.md', '').replace(/_/g, ' ');
+        const activeClass = f === activeArtifactName ? 'active' : '';
+        return `
+          <button class="artifact-tab-btn ${activeClass}" onclick="displayArtifact('${f}')">
+            <span>📄</span>
+            <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${title}</span>
+          </button>
+        `;
+      }).join('');
+
+      if (!activeArtifactName && files.length > 0) {
+        displayArtifact(files[0]);
+      }
+    }
+
+    function displayArtifact(fileName) {
+      activeArtifactName = fileName;
+      renderArtifactsSidebar();
+      const contentPane = document.getElementById('artifactContent');
+      const rawMd = cachedArtifacts[fileName] || '# Document not found';
+      contentPane.innerHTML = `<div class="markdown-reader">${renderMarkdownToHtml(rawMd)}</div>`;
+    }
+
+    function renderMarkdownToHtml(md) {
+      if (!md) return '';
+      let html = md
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+
+      // Code blocks (fenced)
+      html = html.replace(/```([a-zA-Z0-9_-]*)\n([\s\S]*?)```/g, (m, lang, code) => {
+        return `<pre><code class="language-${lang}">${code.trim()}</code></pre>`;
+      });
+
+      // Inline code
+      html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+      // GitHub Callouts/Alerts
+      html = html.replace(/^&gt;\s*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*(.*)$/gm, (m, type, text) => {
+        return `<div class="md-alert md-alert-${type.toLowerCase()}"><strong>[${type}]</strong> ${text}</div>`;
+      });
+
+      // Headings
+      html = html.replace(/^#### (.*$)/gim, '<h4>$1</h4>');
+      html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+      html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+      html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+
+      // Bold & Italic
+      html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+      html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+
+      // Blockquotes
+      html = html.replace(/^&gt; (.*$)/gim, '<blockquote>$1</blockquote>');
+
+      // Lists
+      html = html.replace(/^\s*-\s+(.*$)/gim, '<li>$1</li>');
+      html = html.replace(/(<li>.*<\/li>)/gims, '<ul>$1</ul>');
+      html = html.replace(/<\/ul>\s*<ul>/g, '');
+
+      // Paragraphs
+      const paras = html.split(/\n{2,}/);
+      html = paras.map(p => {
+        p = p.trim();
+        if (!p) return '';
+        if (p.startsWith('<h') || p.startsWith('<pre') || p.startsWith('<ul') || p.startsWith('<blockquote') || p.startsWith('<div')) {
+          return p;
+        }
+        return `<p>${p.replace(/\n/g, '<br/>')}</p>`;
+      }).join('\n');
+
+      return html;
+    }
+
+    /* ========================================================================= */
+    /* 6. TANGENT CARTOGRAPHER & THREAD IMPORT LOGIC                             */
+    /* ========================================================================= */
+    function openTangentModal() {
+      document.getElementById('tangentModal').style.display = 'flex';
+      sounds.playNeedleDrop();
+      if (currentDenState && currentDenState.corner_booth) {
+        renderActiveTangents(currentDenState.corner_booth.active_tangents || []);
+      }
+    }
+
+    function closeTangentModal() {
+      document.getElementById('tangentModal').style.display = 'none';
+    }
+
+    async function submitThreadImport() {
+      const partner = document.getElementById('importPartnerSelect').value;
+      const source = document.getElementById('importSourceSelect').value;
+      const snippet = document.getElementById('importSnippetText').value.trim();
+
+      if (!snippet) {
+        alert("Please paste a conversation snippet or recording transcript first.");
+        return;
+      }
+
+      sounds.playDiceRoll();
+      const res = await fetch('/api/booth/import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: 'badri',
+          partner_id: partner,
+          source: source,
+          raw_text: snippet
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        sounds.playGlassClink();
+        document.getElementById('importSnippetText').value = '';
+        alert(`🗺️ Tangent Mapped: "${data.tangent.title}" added to active Whisper Nook memory!`);
+      } else {
+        alert("Failed to map tangent.");
+      }
+    }
+
+    function renderActiveTangents(tangents) {
+      const container = document.getElementById('tangentsListContainer');
+      const badge = document.getElementById('tangentCountBadge');
+      if (badge) badge.innerText = `${tangents ? tangents.length : 0} active threads`;
+
+      if (!tangents || tangents.length === 0) {
+        container.innerHTML = '<div style="color: #94a3b8; font-size: 11px; text-align: center; padding: 20px;">No open tangents yet. Paste a chat thread above to map conversation continuity.</div>';
+        return;
+      }
+
+      const catLabels = {
+        'unfinished_debate': '⚔️ Unfinished Debate',
+        'unresolved_decision': '🧭 Pending Crossroads',
+        'deep_rabbit_hole': '🌀 Deep Rabbit Hole'
+      };
+
+      container.innerHTML = tangents.map(t => {
+        const quotesHtml = (t.key_quotes && t.key_quotes.length > 0)
+          ? `<div class="tangent-quotes">${t.key_quotes.map(q => `"${q}"`).join('<br/>')}</div>`
+          : '';
+
+        const safeStarter = (t.starter_prompt || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
+        return `
+          <div class="tangent-card">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span class="tangent-badge ${t.category}">${catLabels[t.category] || t.category}</span>
+              <span style="font-size: 10px; color: #94a3b8;">${t.last_discussed}</span>
+            </div>
+            <div class="tangent-title">${t.title}</div>
+            <div class="tangent-summary">${t.summary}</div>
+            ${quotesHtml}
+            <div class="tangent-starter-box">
+              <span class="starter-text">💬 ${t.starter_prompt}</span>
+              <button class="btn-copy-starter" onclick="copyStarterText(this, '${safeStarter}')">Copy Starter</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function copyStarterText(btn, text) {
+      navigator.clipboard.writeText(text);
+      sounds.playGlassClink();
+      const old = btn.innerText;
+      btn.innerText = '✓ Copied!';
+      btn.style.background = '#10b981';
+      setTimeout(() => {
+        btn.innerText = old;
+        btn.style.background = '#a855f7';
+      }, 1800);
+    }
+
+    /* ========================================================================= */
+    /* 7. THE SOVEREIGN ACOUSTIC HEARTH FOCUS CONTROLS                           */
+    /* ========================================================================= */
+    function openHearthModal() {
+      sounds.playWoodThud();
+      document.getElementById('hearthModal').style.display = 'flex';
+      if (currentDenState && currentDenState.hearth_session) {
+        updateHearthUI(currentDenState.hearth_session);
+      }
+    }
+
+    function closeHearthModal() {
+      document.getElementById('hearthModal').style.display = 'none';
+    }
+
+    async function feedHearth(minutes) {
+      sounds.playWoodThud();
+      sounds.toggleFire(true);
+      const res = await fetch('/api/hearth/log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: 'badri', minutes: minutes || 45 })
+      });
+      const data = await res.json();
+      if (data.success) {
+        sounds.playGlassClink();
+        updateHearthUI(data.hearth_session);
+      }
+    }
+
+    function updateHearthUI(session) {
+      if (!session) return;
+      const timeElem = document.getElementById('hearthTimeRemaining');
+      const logsElem = document.getElementById('hearthLogsBurned');
+      const flameIcon = document.getElementById('hearthFlameIcon');
+      const navBtn = document.getElementById('btnHearthNav');
+
+      if (timeElem) timeElem.innerText = `Focus Burn: ${session.duration_minutes}m Active`;
+      if (logsElem) logsElem.innerText = `${session.logs_added} log(s) on the fire • Flame intensity ${Math.round(session.flame_intensity * 100)}%`;
+      if (flameIcon) flameIcon.innerText = session.flame_intensity > 0.6 ? '🔥' : '🪵';
+      if (navBtn) navBtn.innerText = `🪵 Hearth (${session.duration_minutes}m)`;
+    }
+
+    function toggleRainAmbience() {
+      const active = sounds.toggleRain();
+      const btn = document.getElementById('btnToggleRain');
+      if (btn) {
+        btn.innerText = active ? 'Playing 🌧️' : 'Toggle';
+        btn.style.background = active ? 'rgba(56, 189, 248, 0.3)' : '';
+        btn.style.borderColor = active ? '#38bdf8' : '';
+      }
+    }
+
+    function toggleFireAmbience() {
+      const active = sounds.toggleFire();
+      const btn = document.getElementById('btnToggleFire');
+      if (btn) {
+        btn.innerText = active ? 'Crackling 🔥' : 'Toggle';
+        btn.style.background = active ? 'rgba(249, 115, 22, 0.3)' : '';
+        btn.style.borderColor = active ? '#f97316' : '';
+      }
+    }
+
+    /* ========================================================================= */
+    /* 8. THE TANGENT CRUCIBLE: SPARRING AMMO STAGING                            */
+    /* ========================================================================= */
+    function openSparringModal(targetUser) {
+      sounds.playGlassClink();
+      if (targetUser) {
+        const select = document.getElementById('sparringTargetUser');
+        if (select) select.value = targetUser;
+      }
+      document.getElementById('sparringModal').style.display = 'flex';
+      if (currentDenState && currentDenState.corner_booth && currentDenState.corner_booth.active_challenges) {
+        renderStagedChallenges(currentDenState.corner_booth.active_challenges);
+      }
+    }
+
+    function closeSparringModal() {
+      document.getElementById('sparringModal').style.display = 'none';
+    }
+
+    async function submitSparringChallenge() {
+      const targetUser = document.getElementById('sparringTargetUser').value;
+      const topic = document.getElementById('sparringTopic').value.trim();
+      const argument = document.getElementById('sparringArgument').value.trim();
+      const citation = document.getElementById('sparringCitation').value.trim();
+
+      if (!topic || !argument) {
+        alert("Please enter a debate topic and your hot take / argument.");
+        return;
+      }
+
+      sounds.playDiceRoll();
+      const res = await fetch('/api/booth/challenge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          author: 'Badri',
+          target_user: targetUser,
+          topic: topic,
+          argument: argument,
+          citation_link: citation
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        sounds.playGlassClink();
+        document.getElementById('sparringTopic').value = '';
+        document.getElementById('sparringArgument').value = '';
+        document.getElementById('sparringCitation').value = '';
+        alert(`⚔️ Sparring Ammo Pinned to ${targetUser.toUpperCase()}'s Coaster!\nReady for when they walk in.`);
+      }
+    }
+
+    function renderStagedChallenges(challenges) {
+      const container = document.getElementById('stagedChallengesList');
+      const badge = document.getElementById('stagedChallengesBadge');
+      if (badge) badge.innerText = `${challenges ? challenges.length : 0} staged`;
+
+      if (!container) return;
+      if (!challenges || challenges.length === 0) {
+        container.innerHTML = '<div style="color: #94a3b8; font-size: 11px; text-align: center; padding: 14px;">No active coaster challenges yet. Stage one above!</div>';
+        return;
+      }
+
+      container.innerHTML = challenges.map(c => `
+        <div style="background: rgba(0,0,0,0.4); border-left: 3px solid #38bdf8; padding: 8px 12px; border-radius: 6px; font-size: 11px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+            <strong style="color: #38bdf8;">To ${c.target_user.toUpperCase()}: ${c.topic}</strong>
+            <span style="font-size: 9px; background: rgba(56, 189, 248, 0.2); color: #7dd3fc; padding: 1px 6px; border-radius: 999px;">${c.status.toUpperCase()}</span>
+          </div>
+          <div style="color: #fef3c7; font-style: italic;">"${c.raw_argument}"</div>
+          ${c.citation_link ? `<div style="margin-top: 4px;"><a href="${c.citation_link}" target="_blank" style="color: #94a3b8; text-decoration: underline; font-size: 10px;">🔗 ${c.citation_link}</a></div>` : ''}
+        </div>
+      `).join('');
+    }
+
+    /* ========================================================================= */
+    /* 9. CUSTOM DEN STUDIO CLIENT CONTROLS                                      */
+    /* ========================================================================= */
+    let uploadedPhotoFile = null;
+
+    async function openLayoutStudioModal() {
+      sounds.playGlassClink();
+      document.getElementById('layoutStudioModal').style.display = 'flex';
+      await refreshLayoutsList();
+    }
+
+    function closeLayoutStudioModal() {
+      document.getElementById('layoutStudioModal').style.display = 'none';
+    }
+
+    function switchStudioTab(tab) {
+      document.querySelectorAll('.studio-tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('studioTabPrompt').style.display = tab === 'prompt' ? 'block' : 'none';
+      document.getElementById('studioTabPhoto').style.display = tab === 'photo' ? 'block' : 'none';
+      document.getElementById('studioTabGallery').style.display = tab === 'gallery' ? 'block' : 'none';
+
+      if (tab === 'prompt') document.getElementById('tabBtnPrompt').classList.add('active');
+      else if (tab === 'photo') document.getElementById('tabBtnPhoto').classList.add('active');
+      else if (tab === 'gallery') document.getElementById('tabBtnGallery').classList.add('active');
+    }
+
+    function populatePrompt(text) {
+      document.getElementById('promptLayoutInput').value = text;
+    }
+
+    async function refreshLayoutsList() {
+      try {
+        const res = await fetch('/api/layouts');
+        const data = await res.json();
+        availableCustomLayouts = data.layouts || [];
+        const countBadge = document.getElementById('savedDensCount');
+        if (countBadge) countBadge.innerText = availableCustomLayouts.length;
+        renderCustomLayoutsGallery(availableCustomLayouts);
+      } catch (e) {
+        console.error("Failed to fetch layouts:", e);
+      }
+    }
+
+    function renderCustomLayoutsGallery(layouts) {
+      const grid = document.getElementById('savedDensGrid');
+      if (!grid) return;
+      if (!layouts || layouts.length === 0) {
+        grid.innerHTML = '<div style="color: #94a3b8; font-size: 11px; padding: 20px; text-align: center;">No saved dens yet.</div>';
+        return;
+      }
+
+      grid.innerHTML = layouts.map(l => {
+        const pal = l.palette || {};
+        const colors = l.extracted_palette && l.extracted_palette.length > 0
+          ? l.extracted_palette
+          : [pal.background_color || '#0d0907', pal.floor_color || '#1f1d1b', pal.wall_color || '#2b1810', pal.accent_color || '#f59e0b'];
+
+        const chipsHtml = colors.slice(0, 5).map(c => `
+          <div class="palette-chip" style="background-color: ${c};" title="${c}"></div>
+        `).join('');
+
+        const isActive = activeCustomLayout && activeCustomLayout.id === l.id;
+        const sourceLabel = l.source_mode === 'image' ? '📷 Photo' : l.source_mode === 'prompt' ? '✨ Prompt' : '🏛️ Preset';
+
+        return `
+          <div class="layout-card ${isActive ? 'active' : ''}">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 10px; font-weight: 700; background: rgba(236, 72, 153, 0.2); color: #f472b6; padding: 2px 7px; border-radius: 999px;">${sourceLabel}</span>
+              <span style="font-size: 10px; color: #94a3b8;">${l.soundscape || 'ambient'}</span>
+            </div>
+            <div style="font-size: 13px; font-weight: 700; color: #fff;">${l.name}</div>
+            <div style="font-size: 11px; color: #d6c7b2; line-height: 1.3;">${l.vibe_tagline}</div>
+            <div style="display: flex; gap: 4px; margin-top: 4px;">${chipsHtml}</div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 6px;">
+              <button class="scene-btn" style="border-color: #ec4899; color: #f472b6; font-size: 11px; padding: 4px 10px;" onclick="selectSavedLayout('${l.id}')">
+                ${isActive ? '✓ Active Den' : '🛋️ Enter Den'}
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function synthesizeFromPrompt() {
+      const promptText = document.getElementById('promptLayoutInput').value.trim();
+      if (!promptText) {
+        alert("Please enter a vibe description or choose one from inspirations.");
+        return;
+      }
+
+      const btn = document.getElementById('btnSynthesizePrompt');
+      const status = document.getElementById('studioStatusMsg');
+      btn.disabled = true;
+      btn.innerText = "⏳ Synthesizing...";
+      status.innerText = "✨ Synthesizing 3D spatial geometry & harmonic palette...";
+      sounds.playDiceRoll();
+
+      try {
+        const res = await fetch('/api/layouts/prompt', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt: promptText })
+        });
+        const data = await res.json();
+        if (data.success && data.layout) {
+          sounds.playGlassClink();
+          activeCustomLayout = data.layout;
+          setupRoom('custom');
+          document.querySelectorAll('.scene-btn').forEach(b => b.classList.remove('active'));
+          document.getElementById('btnCustomDen').classList.add('active');
+          closeLayoutStudioModal();
+          alert(`✨ Synthesized and entered '${data.layout.name}'!`);
+        } else {
+          alert(data.detail || "Failed to synthesize layout.");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Network error synthesizing layout.");
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "✨ Synthesize 3D Den";
+        status.innerText = "";
+      }
+    }
+
+    function handlePhotoSelected(file) {
+      if (!file) return;
+      uploadedPhotoFile = file;
+      const preview = document.getElementById('photoPreviewImg');
+      const dropzoneContent = document.getElementById('dropzoneContent');
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+        dropzoneContent.style.display = 'none';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function synthesizeFromPhoto() {
+      if (!uploadedPhotoFile) {
+        alert("Please select or drop a photo of your familiar space first.");
+        return;
+      }
+
+      const btn = document.getElementById('btnSynthesizePhoto');
+      const status = document.getElementById('studioStatusMsg');
+      const hint = document.getElementById('photoHintInput').value.trim();
+      btn.disabled = true;
+      btn.innerText = "⏳ Extracting Palette & Architecture...";
+      status.innerText = "📷 Extracting 5-tone palette, materials, and spatial layout from photo...";
+      sounds.playDiceRoll();
+
+      try {
+        const formData = new FormData();
+        formData.append('file', uploadedPhotoFile);
+        if (hint) formData.append('hint', hint);
+
+        const res = await fetch('/api/layouts/upload', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json();
+        if (data.success && data.layout) {
+          sounds.playNeedleDrop();
+          activeCustomLayout = data.layout;
+          setupRoom('custom');
+          document.querySelectorAll('.scene-btn').forEach(b => b.classList.remove('active'));
+          document.getElementById('btnCustomDen').classList.add('active');
+          closeLayoutStudioModal();
+          alert(`📷 Synthesized and entered '${data.layout.name}' from photo!`);
+        } else {
+          alert(data.detail || "Failed to synthesize layout from photo.");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Network error uploading photo.");
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "📷 Synthesize 3D Den from Photo";
+        status.innerText = "";
+      }
+    }
+
+    async function selectSavedLayout(layoutId) {
+      sounds.playGlassClink();
+      try {
+        const res = await fetch('/api/layouts/select', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ layout_id: layoutId })
+        });
+        const data = await res.json();
+        if (data.success && data.layout) {
+          activeCustomLayout = data.layout;
+          setupRoom('custom');
+          document.querySelectorAll('.scene-btn').forEach(b => b.classList.remove('active'));
+          document.getElementById('btnCustomDen').classList.add('active');
+          closeLayoutStudioModal();
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    /* Live WebSocket State Synchronization */
+    function initWebSocket() {
+      const loc = window.location;
+      const wsUri = (loc.protocol === "https:" ? "wss://" : "ws://") + loc.host + "/ws";
+      const ws = new WebSocket(wsUri);
+
+      ws.onmessage = function(event) {
+        const state = JSON.parse(event.data);
+        currentDenState = state;
+        updateLedger(state);
+      };
+
+      ws.onclose = function() {
+        setTimeout(initWebSocket, 2000);
+      };
+    }
+
+    function updateLedger(state) {
+      document.getElementById('stoolCountBadge').innerText = `${state.active_friends_count} / ${state.dunbar_cap} Stools Filled`;
+
+      if (state.available_custom_layouts) {
+        availableCustomLayouts = state.available_custom_layouts;
+        const countBadge = document.getElementById('savedDensCount');
+        if (countBadge) countBadge.innerText = availableCustomLayouts.length;
+      }
+
+      if (state.current_custom_layout && currentRoom === 'custom') {
+        if (!activeCustomLayout || activeCustomLayout.id !== state.current_custom_layout.id) {
+          activeCustomLayout = state.current_custom_layout;
+          setupRoom('custom');
+        }
+      }
+
+      if (state.corner_booth && state.corner_booth.active_tangents) {
+        renderActiveTangents(state.corner_booth.active_tangents);
+      }
+
+      if (state.corner_booth && state.corner_booth.active_challenges) {
+        renderStagedChallenges(state.corner_booth.active_challenges);
+      }
+
+      if (state.hearth_session) {
+        updateHearthUI(state.hearth_session);
+      }
+
+      const jList = document.getElementById('ledgerJokesList');
+      jList.innerHTML = state.inside_jokes.map(j => `
+        <div class="ledger-item">
+          <div style="color: #fef3c7; font-weight: 600;">"${j.quote}"</div>
+          <div style="color: #94a3b8; font-size: 10px;">— ${j.author} (${j.context})</div>
+        </div>
+      `).join('');
+
+      const mList = document.getElementById('ledgerMoviesList');
+      mList.innerHTML = Object.entries(state.letterboxd_streams).map(([uid, lb]) => {
+        const u = state.users.find(usr => usr.id === uid) || { name: uid };
+        return `
+          <div class="ledger-item" style="border-color: #fbbf24;">
+            <strong>${u.name}:</strong> ${lb.title} (${lb.rating}★)
+            <div style="color: #94a3b8; font-style: italic;">"${lb.review_snippet}"</div>
+          </div>
+        `;
+      }).join('');
+
+      const cList = document.getElementById('ledgerCommitsList');
+      cList.innerHTML = Object.entries(state.github_streams).map(([uid, gh]) => {
+        const u = state.users.find(usr => usr.id === uid) || { name: uid };
+        return `
+          <div class="ledger-item" style="border-color: #38bdf8; font-family: monospace;">
+            <strong>${u.name}</strong> @ ${gh.repo}: ${gh.commit_msg}
+          </div>
+        `;
+      }).join('');
+    }
+
+    window.onload = function() {
+      init3D();
+      initWebSocket();
+
+      const dz = document.getElementById('photoDropzone');
+      if (dz) {
+        dz.addEventListener('dragover', (e) => { e.preventDefault(); dz.classList.add('dragover'); });
+        dz.addEventListener('dragleave', () => { dz.classList.remove('dragover'); });
+        dz.addEventListener('drop', (e) => {
+          e.preventDefault();
+          dz.classList.remove('dragover');
+          if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+            handlePhotoSelected(e.dataTransfer.files[0]);
+          }
+        });
+      }
+    };
+  </script>
+</body>
+</html>
