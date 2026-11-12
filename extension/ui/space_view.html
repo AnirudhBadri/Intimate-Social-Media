@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZenTab Space — Chrono-Spatial Tab Sanctuary</title>
+  <!-- Google Fonts: Instrument Sans & DM Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="space_view.css" />
+</head>
+<body class="space-sanctuary">
+  <!-- Living Atmosphere: Subtle Topographic Gradients & Starfield Grid -->
+  <div class="space-ambient-grid" aria-hidden="true"></div>
+  <div class="space-glow-orb orb-primary" aria-hidden="true"></div>
+  <div class="space-glow-orb orb-secondary" aria-hidden="true"></div>
+
+  <div class="sanctuary-shell">
+    <!-- Spatial Command Header -->
+    <header class="sanctuary-topbar">
+      <div class="sanctuary-brand">
+        <div class="brand-crest">
+          <svg class="crest-svg" viewBox="0 0 32 32" fill="none">
+            <circle cx="16" cy="16" r="14" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 3" opacity="0.4"/>
+            <circle cx="16" cy="16" r="8" fill="var(--p-accent)" fill-opacity="0.15" stroke="var(--p-accent)" stroke-width="1.5"/>
+            <circle cx="16" cy="16" r="3.5" fill="var(--p-accent)"/>
+            <path d="M16 2 V8 M16 24 V30 M2 16 H8 M24 16 H30" stroke="currentColor" stroke-width="1.2" opacity="0.3"/>
+          </svg>
+          <span class="active-pulse-beacon" title="Neural Lineage Engine Active"></span>
+        </div>
+        <div>
+          <div class="brand-title-line">
+            <span class="brand-name">ZenTab</span>
+            <span class="space-tag-badge" id="currentSpaceBadge">AI Safety Sanctuary</span>
+          </div>
+          <div class="brand-subline">
+            <span id="sanctuaryStats">4 open nodes · 3 provenance-linked</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sanctuary-controls">
+        <div class="mode-toggles">
+          <button type="button" class="mode-toggle-btn active" id="modeConstellationBtn" title="Constellation Graph View">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="8" r="3"/><circle cx="12" cy="18" r="3"/><path d="M8.5 7.5l7 1.5M7.5 8.5l3.5 7M16.5 10l-3.5 6"/></svg>
+            <span>Constellation</span>
+          </button>
+          <button type="button" class="mode-toggle-btn" id="modeCardsBtn" title="Field Deck Cards">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            <span>Cards</span>
+          </button>
+        </div>
+        <button type="button" id="sortZenTabsBtn" class="zen-action-btn" title="Physically reorder unpinned tabs in Zen Browser's sidebar to match this space cluster">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 16V4M7 4L3 8M7 4L11 8M17 8V20M17 20L21 16M17 20L13 16"/></svg>
+          <span>Sort Zen Tabs</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Sanctuary Body: Spatial Canvas + Inspector Drawer -->
+    <div class="sanctuary-body">
+      <!-- MAIN STAGE: Constellation Knowledge Canvas -->
+      <section class="space-canvas-stage" id="canvasStage">
+        <!-- Spatial Filter & Search HUD -->
+        <div class="space-hud-bar">
+          <div class="hud-search-shell">
+            <svg class="search-lens" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input type="search" id="spaceSearchInput" class="hud-search-input" placeholder="Query tabs, anchor text, origin or To-Dos..." />
+            <kbd class="hud-kbd">/</kbd>
+          </div>
+
+          <div class="space-filter-pills" id="taxonomyFilters">
+            <button type="button" class="space-pill active" data-filter="all">All Orbit</button>
+            <button type="button" class="space-pill" data-filter="AI Safety & SecOps">AI Safety</button>
+            <button type="button" class="space-pill" data-filter="Code & Repositories">Repos</button>
+            <button type="button" class="space-pill" data-filter="with-todo">Has Action</button>
+            <button type="button" class="space-pill" data-filter="target-soon">Due Today</button>
+          </div>
+        </div>
+
+        <!-- Dynamic Graph Canvas / Interactive Node Space -->
+        <div class="constellation-viewport" id="constellationViewport">
+          <!-- Background SVG for dynamic connection beams -->
+          <svg class="constellation-svg" id="constellationSvg" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="beamGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="var(--p-accent)" stop-opacity="0.8"/>
+                <stop offset="100%" stop-color="#a855f7" stop-opacity="0.2"/>
+              </linearGradient>
+            </defs>
+          </svg>
+
+          <!-- Spatial Nodes Rendered Here Dynamically -->
+          <div class="nodes-layer" id="nodesLayer"></div>
+        </div>
+
+        <!-- Bottom Quick-Insight Strip -->
+        <div class="space-footer-strip">
+          <div class="space-tip">
+            <span class="space-tip-tag">TIP</span>
+            <span class="space-tip-text">Click any node to focus & inspect its parent lineage, captured snippet and target deadline.</span>
+          </div>
+          <div class="space-metrics-cluster" id="spaceMetricsCluster">
+            <span class="metric-tag"><strong id="metricParentCount">1</strong> Origin Hub</span>
+            <span class="metric-tag"><strong id="metricActionCount">2</strong> Actions</span>
+            <span class="metric-tag"><strong id="metricReadingTime">14m</strong> Total Immersion</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- SIDE DOCK: Active Node Telemetry & Action Forge -->
+      <aside class="space-inspector-dock" id="inspectorDock">
+        <div class="dock-header">
+          <div class="dock-title-group">
+            <span class="dock-glyph">☍</span>
+            <span class="dock-title">Node Telemetry</span>
+          </div>
+          <span class="dock-state-badge" id="dockTriggerBadge">CTRL+CLICK</span>
+        </div>
+
+        <!-- Node Header Card -->
+        <div class="dock-node-card">
+          <div class="dock-node-top">
+            <div class="node-crest" id="dockFaviconWrap">
+              <img id="dockFavicon" src="../icons/icon.svg" alt="" class="dock-fav" />
+            </div>
+            <div class="dock-titles">
+              <h2 id="dockTabTitle" class="dock-tab-title">Select a tab node in the constellation</h2>
+              <div class="dock-domain-row">
+                <span id="dockTabDomain" class="dock-domain-text">—</span>
+                <button type="button" id="dockCopyUrlBtn" class="dock-icon-action" title="Copy URL">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chrono Telemetry Metrics Strip -->
+          <div class="dock-chrono-strip">
+            <div class="chrono-cell">
+              <span class="chrono-lbl">SPAWNED</span>
+              <span class="chrono-val" id="dockOpenedAt">—</span>
+            </div>
+            <div class="chrono-cell">
+              <span class="chrono-lbl">READING TIME</span>
+              <span class="chrono-val text-cyan" id="dockActiveDuration">0s</span>
+            </div>
+            <div class="chrono-cell">
+              <span class="chrono-lbl">CONTAINER</span>
+              <span class="chrono-val" id="dockContainer">Default</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Provenance Circuit Trace -->
+        <div class="dock-provenance-circuit">
+          <div class="circuit-header">
+            <span>PROVENANCE ROOT</span>
+            <button type="button" id="dockJumpParentBtn" class="jump-parent-link" hidden>
+              Jump to Opener Tab ↰
+            </button>
+          </div>
+          <div class="circuit-origin-box">
+            <div class="origin-subtext" id="dockOriginSubtext">Direct Navigation</div>
+            <a id="dockOriginUrl" href="#" target="_blank" class="origin-url-link" hidden>View Source Page ↗</a>
+          </div>
+
+          <div class="anchor-tag-strip" id="dockAnchorRow">
+            <span class="anchor-label">CLICKED ANCHOR</span>
+            <div class="anchor-text-code" id="dockAnchorText">—</div>
+          </div>
+
+          <div class="dom-snippet-terminal">
+            <div class="terminal-bar">
+              <span>CAPTURED DOM SNIPPET</span>
+              <button type="button" id="dockCopySnippetBtn" class="copy-snippet-btn">Copy</button>
+            </div>
+            <blockquote class="terminal-body" id="dockSnippet">
+              Select any node in the constellation to view the DOM context captured upon Ctrl+Click.
+            </blockquote>
+          </div>
+        </div>
+
+        <!-- Action & Schedule Forge -->
+        <div class="dock-action-forge">
+          <div class="forge-header">
+            <span>TASK &amp; TARGET CHRONO</span>
+            <span id="dockSaveStatus" class="save-status-text">● Synced</span>
+          </div>
+
+          <!-- Action Item Input Capsule -->
+          <div class="forge-todo-capsule">
+            <label class="forge-checkbox-label">
+              <input type="checkbox" id="dockTodoCheck" class="forge-check-input" />
+              <span class="forge-check-custom">✓</span>
+            </label>
+            <input type="text" id="dockTodoInput" class="forge-todo-input" placeholder="Attach next action item to this tab..." />
+          </div>
+
+          <!-- Target Time Radial Strip -->
+          <div class="forge-schedule-block">
+            <div class="forge-schedule-top">
+              <span class="sched-kicker">TARGET DEADLINE</span>
+              <span id="dockTargetStatus" class="sched-status-pill">Unscheduled</span>
+            </div>
+            <div class="sched-presets-row">
+              <button type="button" class="preset-pill" data-min="30">+30m</button>
+              <button type="button" class="preset-pill" data-min="120">+2h</button>
+              <button type="button" class="preset-pill" data-preset="tonight">Tonight 9p</button>
+              <button type="button" class="preset-pill" data-preset="tomorrow">Tomorrow</button>
+              <button type="button" class="preset-pill reset" id="dockClearTargetBtn">Reset</button>
+            </div>
+            <input type="datetime-local" id="dockTargetInput" class="forge-datetime-input" />
+          </div>
+
+          <!-- Scratchpad Note -->
+          <div class="forge-note-block">
+            <label class="forge-note-label" for="dockNoteInput">SANCTUARY NOTE</label>
+            <textarea id="dockNoteInput" rows="2" class="forge-note-textarea" placeholder="Record key quotes, research insights or reasons for keeping this tab open..."></textarea>
+          </div>
+        </div>
+
+        <!-- Dock Footer Exports -->
+        <div class="dock-footer-actions">
+          <button type="button" id="dockCalendarExportBtn" class="dock-btn-secondary" title="Export this tab or workspace to Google Calendar">
+            <span>📅 Calendar Block</span>
+          </button>
+          <button type="button" id="dockCopyMdBtn" class="dock-btn-secondary" title="Copy structured Markdown task list">
+            <span>📋 Copy Markdown</span>
+          </button>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script src="space_view.js"></script>
+</body>
+</html>

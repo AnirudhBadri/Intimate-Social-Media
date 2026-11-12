@@ -1,0 +1,82 @@
+{
+  "manifest_version": 2,
+  "name": "ZenTab Provenance & Action Tracker",
+  "short_name": "ZenTab Provenance",
+  "version": "1.0.0",
+  "description": "Track exact Ctrl+Click link provenance (parent page, anchor text, DOM snippet, open time, Zen space), maintain per-tab Notes, To-Dos, and Target-Times, and cluster tabs by lineage.",
+  "author": "ZenTab Contributors",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "zentab-provenance@zen.local",
+      "strict_min_version": "115.0"
+    }
+  },
+  "icons": {
+    "48": "icons/icon.svg",
+    "96": "icons/icon.svg"
+  },
+  "permissions": [
+    "tabs",
+    "webNavigation",
+    "storage",
+    "contextualIdentities",
+    "cookies",
+    "alarms",
+    "notifications",
+    "menus",
+    "<all_urls>"
+  ],
+  "background": {
+    "scripts": [
+      "background/background.js"
+    ],
+    "persistent": true
+  },
+  "browser_action": {
+    "default_icon": {
+      "48": "icons/icon.svg"
+    },
+    "default_title": "ZenTab Provenance & To-Do (Alt+Shift+Z)",
+    "default_popup": "ui/panel.html?mode=popup"
+  },
+  "sidebar_action": {
+    "default_icon": "icons/icon.svg",
+    "default_title": "ZenTab Provenance Tree",
+    "default_panel": "ui/panel.html?mode=sidebar",
+    "open_at_install": false
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content/provenance_capture.js"
+      ],
+      "css": [
+        "content/micro_hud.css"
+      ],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ],
+  "commands": {
+    "_execute_browser_action": {
+      "suggested_key": {
+        "default": "Alt+Shift+Z"
+      },
+      "description": "Open ZenTab Provenance & To-Do Popup"
+    },
+    "_execute_sidebar_action": {
+      "suggested_key": {
+        "default": "Alt+Shift+X"
+      },
+      "description": "Toggle ZenTab Provenance Sidebar"
+    }
+  },
+  "web_accessible_resources": [
+    "ui/space_view.html",
+    "onboarding/tutorial.html",
+    "icons/icon.svg"
+  ]
+}

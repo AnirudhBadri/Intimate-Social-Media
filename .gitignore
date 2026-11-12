@@ -1,0 +1,11 @@
+# Python caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.aac
+
+# Audio cache directories
+audio_recordings_cache/
+
+# UI Design Pro taste telemetry
+.taste-skill/
