@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZenTab Provenance — Interactive Product Tour</title>
+  <link rel="stylesheet" href="../content/micro_hud.css" />
+  <link rel="stylesheet" href="tutorial.css" />
+</head>
+<body>
+  <!-- Ambient Aurora Backdrop Orbs -->
+  <div class="aurora-mesh mesh-1" aria-hidden="true"></div>
+  <div class="aurora-mesh mesh-2" aria-hidden="true"></div>
+  <div class="aurora-mesh mesh-3" aria-hidden="true"></div>
+
+  <div class="tutorial-wrapper">
+    <!-- Top Glass Command Header -->
+    <header class="tut-header">
+      <div class="tut-brand">
+        <div class="logo-orb">
+          <img src="../icons/icon.svg" alt="ZenTab" class="tut-logo" />
+        </div>
+        <div>
+          <div class="brand-kicker-row">
+            <span class="tut-badge">INTERACTIVE ONBOARDING</span>
+            <span class="wcag-pill">WCAG AAA · ZERO-LLM</span>
+          </div>
+          <h1>ZenTab Provenance &amp; Action Studio</h1>
+        </div>
+      </div>
+
+      <!-- Segmented Stepper -->
+      <div class="stepper" id="stepperDots">
+        <button type="button" class="step-dot active" data-step="0">
+          <span class="step-idx">01</span> Lineage OS
+        </button>
+        <button type="button" class="step-dot" data-step="1">
+          <span class="step-idx">02</span> Live Sandbox
+        </button>
+        <button type="button" class="step-dot" data-step="2">
+          <span class="step-idx">03</span> Radial Target
+        </button>
+        <button type="button" class="step-dot" data-step="3">
+          <span class="step-idx">04</span> Zen Sorting
+        </button>
+        <button type="button" class="step-dot" data-step="4">
+          <span class="step-idx">05</span> Launchpad
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Slide Stage -->
+    <main class="slide-stage">
+      <!-- =================================================================
+           STEP 1: HERO BENTO & ANIMATED SVG PROVENANCE CIRCUIT
+           ================================================================= -->
+      <section class="tut-slide active" data-slide="0">
+        <div class="hero-split">
+          <div class="hero-copy">
+            <span class="step-kicker">01 / 05 · BUILT FOR ZEN BROWSER</span>
+            <h2>Every Tab Has an Origin Story. <span class="grad-text">Never Lose It.</span></h2>
+            <p class="lead">
+              Opening 15 links via <code>Ctrl+Click</code> from GitHub Stars, arXiv, or Hacker News leaves a wall of mystery tabs. ZenTab intercepts the click in real time—preserving the parent hub, anchor text, and surrounding DOM snippet alongside a per-tab To-Do and Target-Time.
+            </p>
+          </div>
+
+          <!-- Animated SVG Lineage Graph Showcase -->
+          <div class="hero-graph-card">
+            <div class="graph-card-label">LIVE LINEAGE TOPOLOGY</div>
+            <svg class="lineage-svg" viewBox="0 0 360 155" fill="none">
+              <!-- Animated Bezier Connectors -->
+              <path class="trace-bg" d="M95 77 C150 77, 160 32, 215 32" />
+              <path class="trace-pulse pulse-1" d="M95 77 C150 77, 160 32, 215 32" />
+
+              <path class="trace-bg" d="M95 77 C150 77, 160 77, 215 77" />
+              <path class="trace-pulse pulse-2" d="M95 77 C150 77, 160 77, 215 77" />
+
+              <path class="trace-bg" d="M95 77 C150 77, 160 122, 215 122" />
+              <path class="trace-pulse pulse-3" d="M95 77 C150 77, 160 122, 215 122" />
+
+              <!-- Parent Hub Node -->
+              <rect x="8" y="55" width="88" height="44" rx="10" fill="#131726" stroke="#22D3EE" stroke-width="1.5" />
+              <text x="52" y="74" text-anchor="middle" fill="#FFFFFF" font-size="10" font-weight="800">★ Your Stars</text>
+              <text x="52" y="88" text-anchor="middle" fill="#67E8F9" font-size="8.5" font-family="monospace">github.com</text>
+
+              <!-- Child Node 1 -->
+              <rect x="215" y="14" width="136" height="36" rx="8" fill="#131726" stroke="#A855F7" stroke-width="1.2" />
+              <text x="225" y="30" fill="#FFFFFF" font-size="9.5" font-weight="700">splunk/attack_data</text>
+              <text x="225" y="42" fill="#C084FC" font-size="8" font-family="monospace">Ctrl+Click · +30m</text>
+
+              <!-- Child Node 2 -->
+              <rect x="215" y="59" width="136" height="36" rx="8" fill="#181E34" stroke="#22D3EE" stroke-width="1.5" />
+              <text x="225" y="75" fill="#FFFFFF" font-size="9.5" font-weight="700">Internal-Safety-Collapse</text>
+              <text x="225" y="87" fill="#34D399" font-size="8" font-family="monospace">To-Do: Audit eval</text>
+
+              <!-- Child Node 3 -->
+              <rect x="215" y="104" width="136" height="36" rx="8" fill="#131726" stroke="#6366F1" stroke-width="1.2" />
+              <text x="225" y="120" fill="#FFFFFF" font-size="9.5" font-weight="700">Wang-Yanting/PIMiner</text>
+              <text x="225" y="132" fill="#94A3B8" font-size="8" font-family="monospace">Ctrl+Click · Tonight</text>
+            </svg>
+          </div>
+        </div>
+
+        <div class="bento-3-grid">
+          <div class="bento-feature-card">
+            <div class="feat-badge cyan">CAPTURE PHASE</div>
+            <h3>DOM Context Extraction</h3>
+            <p>
+              Captures the exact clicked link text, surrounding repository description or article paragraph, and parent URL before the new tab even finishes loading.
+            </p>
+          </div>
+          <div class="bento-feature-card">
+            <div class="feat-badge purple">ON-PAGE HUD</div>
+            <h3>4.5s Raycast-Style Toast</h3>
+            <p>
+              A sleek corner HUD appears on your current page when you <code>Ctrl+Click</code>. Tap <kbd>T</kbd> to attach a To-Do or <kbd>1</kbd>–<kbd>4</kbd> to schedule a Target-Time without switching tabs.
+            </p>
+          </div>
+          <div class="bento-feature-card">
+            <div class="feat-badge emerald">ZERO-LLM NATIVE</div>
+            <h3>Zen Sidebar Clustering</h3>
+            <p>
+              Group open tabs by Referrer Hub, Purpose Taxonomy, or 15m Session Burst—and physically reorder your vertical tabs in Zen Browser in one click.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================
+           STEP 2: HANDS-ON INTERACTIVE CTRL+CLICK SANDBOX
+           ================================================================= -->
+      <section class="tut-slide" data-slide="1">
+        <div class="slide-hero">
+          <span class="step-kicker">02 / 05 · HANDS-ON INTERACTIVE SANDBOX</span>
+          <h2>Test It Live: <code>Ctrl+Click</code> Any Repo Card Below</h2>
+          <p class="lead">
+            Hold <kbd>Ctrl</kbd> (or <kbd>Cmd</kbd> / Middle-Click) and click any repository link on the left—or click <strong>⚡ Simulate Ctrl+Click</strong>—to trigger the real provenance interceptor and bottom-right Micro-HUD!
+          </p>
+        </div>
+
+        <div class="sandbox-layout">
+          <!-- Mock GitHub Stars List -->
+          <div class="mock-github-box">
+            <div class="mock-gh-header">
+              <div class="window-dots">
+                <span class="w-dot red"></span>
+                <span class="w-dot amber"></span>
+                <span class="w-dot green"></span>
+                <span class="gh-title">github.com / Your Stars</span>
+              </div>
+              <button type="button" id="simulateCtrlClickBtn" class="glow-action-btn">
+                ⚡ Simulate Ctrl+Click
+              </button>
+            </div>
+
+            <ul class="mock-repo-list">
+              <li class="mock-repo-item">
+                <div class="repo-top-line">
+                  <a
+                    href="https://github.com/wuyoscar/Internal-Safety-Collapse"
+                    target="_blank"
+                    class="sandbox-link"
+                  >wuyoscar / Internal-Safety-Collapse</a>
+                  <span class="star-pill">★ Starred</span>
+                </div>
+                <p class="mock-repo-desc">
+                  [NeurIPS 2026] We built an adversarial codespace setup. Place any AI agent into a normal workflow inside it, and the agent will fill in whatever is missing.
+                </p>
+                <span class="mock-repo-meta">● Python · ★ 1,755 · Updated yesterday</span>
+              </li>
+
+              <li class="mock-repo-item">
+                <div class="repo-top-line">
+                  <a
+                    href="https://github.com/splunk/attack_data"
+                    target="_blank"
+                    class="sandbox-link"
+                  >splunk / attack_data</a>
+                  <span class="star-pill">★ Starred</span>
+                </div>
+                <p class="mock-repo-desc">
+                  A repository of curated datasets from various attacks for security telemetry and threat hunting.
+                </p>
+                <span class="mock-repo-meta">● Python · ★ 832 · Updated 11 minutes ago</span>
+              </li>
+
+              <li class="mock-repo-item">
+                <div class="repo-top-line">
+                  <a
+                    href="https://github.com/Wang-Yanting/PIMiner"
+                    target="_blank"
+                    class="sandbox-link"
+                  >Wang-Yanting / PIMiner</a>
+                  <span class="star-pill">★ Starred</span>
+                </div>
+                <p class="mock-repo-desc">
+                  Automated mining and benchmark framework for indirect prompt injection vulnerabilities.
+                </p>
+                <span class="mock-repo-meta">● Python · ★ 13 · Updated on Sep 14</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Live Telemetry Inspector -->
+          <div class="telemetry-box">
+            <div class="telemetry-header">
+              <span>LIVE PROVENANCE TELEMETRY STREAM</span>
+              <span id="sandboxStatusBadge" class="status-pill waiting">Awaiting Ctrl+Click…</span>
+            </div>
+            <pre id="sandboxPayloadOutput" class="telemetry-pre">{
+  "status": "READY",
+  "instruction": "Hold Ctrl and click any repository link on the left (or click 'Simulate Ctrl+Click') to inspect the captured DOM context!"
+}</pre>
+            <div class="telemetry-tip">
+              <span>⚡ <strong>Pro-Tip:</strong> When the corner Micro-HUD appears in the bottom-right, press <kbd>T</kbd> to type a quick To-Do or <kbd>1</kbd> to set a <code>+30m</code> Target-Time!</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================
+           STEP 3: INTERACTIVE RADIAL TARGET-TIME & ACTION SIMULATOR
+           ================================================================= -->
+      <section class="tut-slide" data-slide="2">
+        <div class="slide-hero">
+          <span class="step-kicker">03 / 05 · PER-TAB ACTION STUDIO</span>
+          <h2>Interactive Radial Target-Time &amp; Scratchpad Notes</h2>
+          <p class="lead">
+            Press <kbd>Alt+Shift+Z</kbd> on any open tab to open the <strong>Chrono-Lineage Inspector</strong>. Try clicking the Target-Time presets in the interactive simulator below to see how the radial gauge responds:
+          </p>
+        </div>
+
+        <div class="simulator-split">
+          <!-- Interactive Radial Ring Simulator -->
+          <div class="sim-ring-panel">
+            <div class="sim-ring-display">
+              <div class="sim-svg-wrap">
+                <svg class="sim-svg" viewBox="0 0 88 88">
+                  <circle class="sim-track" cx="44" cy="44" r="36" />
+                  <circle id="simRingArc" class="sim-arc" cx="44" cy="44" r="36" />
+                </svg>
+                <div class="sim-ring-center">
+                  <span id="simRingVal" class="sim-val">30m</span>
+                  <span id="simRingSub" class="sim-sub">ON TRACK</span>
+                </div>
+              </div>
+
+              <div class="sim-controls">
+                <span class="sim-kicker">CLICK TO TEST RADIAL STATE:</span>
+                <div class="sim-btn-row">
+                  <button type="button" class="sim-preset-btn active" data-sim="30m">+30m (Soon)</button>
+                  <button type="button" class="sim-preset-btn" data-sim="2h">+2h (Scheduled)</button>
+                  <button type="button" class="sim-preset-btn" data-sim="overdue">Overdue Alert</button>
+                  <button type="button" class="sim-preset-btn" data-sim="done">✓ Done</button>
+                </div>
+                <p id="simStatusDesc" class="sim-desc">
+                  ⏰ <strong>Amber State (&lt;60m):</strong> Fires a desktop notification via <code>browser.alarms</code> when time is up; clicking the notification focuses the tab.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3 Pillar Cards -->
+          <div class="sim-pillars">
+            <div class="pillar-row-card">
+              <span class="pillar-num">01</span>
+              <div>
+                <h4>Jump to Parent Hub Tab</h4>
+                <p>One click jumps right back to the opener tab that spawned your current research branch.</p>
+              </div>
+            </div>
+            <div class="pillar-row-card">
+              <span class="pillar-num">02</span>
+              <div>
+                <h4>Persistent URL Archive</h4>
+                <p>Notes, To-Dos, and Provenance are indexed by normalized URL so closing and reopening a tab restores everything.</p>
+              </div>
+            </div>
+            <div class="pillar-row-card">
+              <span class="pillar-num">03</span>
+              <div>
+                <h4>Active Reading Timer</h4>
+                <p>Automatically tracks cumulative focused reading time (<code>activeDurationMs</code>) on every tab.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================
+           STEP 4: LINEAGE TREE, ZEN TAB SORTING & FOCUS STUDIO
+           ================================================================= -->
+      <section class="tut-slide" data-slide="3">
+        <div class="slide-hero">
+          <span class="step-kicker">04 / 05 · WORKSPACE ORCHESTRATION</span>
+          <h2>Cluster by Lineage Tree &amp; Sort Zen Sidebar in 1 Click</h2>
+          <p class="lead">
+            Switch to the <strong>Lineage Tree</strong> or <strong>Focus Studio</strong> view in the popup (<kbd>Alt+Shift+Z</kbd>) or full sidebar (<kbd>Alt+Shift+X</kbd>) to triage dozens of tabs at once.
+          </p>
+        </div>
+
+        <div class="bento-2-grid">
+          <div class="bento-feature-card large-card">
+            <div class="feat-badge cyan">5 DETERMINISTIC CLUSTERS · $0 COST</div>
+            <h3>🌳 Smart Grouping Modes</h3>
+            <ul class="styled-feature-list">
+              <li><span>Origin / Referrer Hub:</span> Nest all child tabs under the parent page that spawned them (e.g., <em>Origin Hub: Your Stars (12)</em>).</li>
+              <li><span>Purpose Taxonomy:</span> Zero-LLM classifier groups tabs into <em>AI Safety &amp; SecOps</em>, <em>Code &amp; Repos</em>, <em>Research &amp; Papers</em>, <em>Docs</em>, or <em>Cloud Admin</em>.</li>
+              <li><span>To-Do &amp; Target Queue:</span> Surfaces overdue and scheduled tabs at the very top.</li>
+              <li><span>15m Session Bursts:</span> Groups tabs opened during the same 15-minute research sprint.</li>
+            </ul>
+          </div>
+
+          <div class="bento-feature-card large-card">
+            <div class="feat-badge purple">ZEN SIDEBAR + CALENDAR SYNC</div>
+            <h3>⇄ Physical Tab Sorting &amp; Focus Blocks</h3>
+            <ul class="styled-feature-list">
+              <li><span>⇄ Sort Zen Sidebar:</span> Uses <code>browser.tabs.move()</code> to physically reorder unpinned tabs in Zen Browser's vertical tab bar to match your active cluster!</li>
+              <li><span>📅 Google Calendar &amp; .ICS Export:</span> Bundles all scheduled tabs into a single 45-minute Calendar Focus Block with clickable provenance links.</li>
+              <li><span>📋 Antigravity Markdown Export:</span> Copies a formatted Markdown task list with parent URLs and DOM snippets.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================
+           STEP 5: LAUNCHPAD & LIVE POPUP PREVIEW
+           ================================================================= -->
+      <section class="tut-slide" data-slide="4">
+        <div class="slide-hero">
+          <span class="step-kicker">05 / 05 · READY FOR TAKEOFF</span>
+          <h2>Customize Your Workspace &amp; Preview the Inspector</h2>
+          <p class="lead">
+            Set your default Zen Workspace label below, or click <strong>✦ Preview Inspector UI</strong> to interact with the full popup interface right inside this tab!
+          </p>
+        </div>
+
+        <div class="launchpad-grid">
+          <div class="setup-box">
+            <label class="setup-row">
+              <input type="checkbox" id="tutHudToggle" checked />
+              <div>
+                <strong>Enable 4.5s On-Page Ctrl+Click Micro-HUD Toast</strong>
+                <p>Show the Raycast-style corner HUD with depleting timer bar whenever you open a link in a background tab.</p>
+              </div>
+            </label>
+
+            <div class="setup-input-row">
+              <label for="tutDefaultSpace"><strong>Default Zen Workspace Tag:</strong></label>
+              <input type="text" id="tutDefaultSpace" value="AI Safety Lab" class="tut-input" />
+            </div>
+
+            <div class="shortcut-pills-row">
+              <div class="sc-pill"><kbd>Alt+Shift+Z</kbd> Popup Inspector</div>
+              <div class="sc-pill"><kbd>Alt+Shift+X</kbd> Zen Sidebar Tree</div>
+              <div class="sc-pill"><kbd>Ctrl+Click</kbd> Capture + Micro-HUD</div>
+            </div>
+          </div>
+
+          <div class="preview-launch-card">
+            <div class="feat-badge emerald">INTERACTIVE DEMO</div>
+            <h3>Want to Inspect Your Tabs Right Now?</h3>
+            <p>
+              Open the live <strong>Chrono-Lineage Inspector</strong> in a floating preview drawer or pin the ZenTab icon in your Zen Browser toolbar.
+            </p>
+            <button type="button" id="toggleLivePopupModalBtn" class="glow-action-btn full-width-btn">
+              ✦ Open Live Inspector Preview Drawer
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Bottom Click-Through Navigation Footer -->
+    <footer class="tut-footer">
+      <button type="button" id="prevStepBtn" class="nav-btn secondary" disabled>
+        ← Previous
+      </button>
+      <div class="step-counter" id="stepCounterText">Step 01 of 05 · Use ← → Arrow Keys</div>
+      <div class="footer-right">
+        <button type="button" id="nextStepBtn" class="nav-btn primary">
+          Next Step →
+        </button>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Optional Live Inspector Preview Modal -->
+  <div id="livePopupModal" class="popup-modal-backdrop" hidden>
+    <div class="popup-modal-frame">
+      <div class="popup-modal-bar">
+        <span>✦ Live ZenTab Inspector Preview (Alt+Shift+Z)</span>
+        <button type="button" id="closePopupModalBtn" class="modal-close-btn">×</button>
+      </div>
+      <iframe src="../ui/panel.html" class="popup-iframe" title="ZenTab Inspector Preview"></iframe>
+    </div>
+  </div>
+
+  <script src="../content/provenance_capture.js"></script>
+  <script src="tutorial.js"></script>
+</body>
+</html>

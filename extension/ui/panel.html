@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZenTab Provenance — Chrono-Lineage &amp; Action Studio</title>
+  <link rel="stylesheet" href="panel.css" />
+</head>
+<body>
+  <!-- Ambient Aurora Backdrop -->
+  <div class="aurora-orb orb-1" aria-hidden="true"></div>
+  <div class="aurora-orb orb-2" aria-hidden="true"></div>
+
+  <div class="app-shell">
+    <!-- Top Command Header -->
+    <header class="top-bar">
+      <div class="brand">
+        <div class="brand-logo-wrap">
+          <img src="../icons/icon.svg" alt="ZenTab" class="brand-icon" />
+          <span class="live-pulse-dot" title="Provenance Engine Active"></span>
+        </div>
+        <div>
+          <div class="brand-title-row">
+            <h1 class="brand-title">ZenTab</h1>
+            <span class="version-chip">PROVENANCE OS</span>
+          </div>
+          <span class="brand-subtitle" id="headerStats">Syncing Zen workspace…</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <a href="space_view.html" target="_blank" class="cmd-btn" style="text-decoration:none;" title="Open Chrono-Spatial Tab Sanctuary in a full browser tab">
+          <span class="cmd-icon">🪐</span> Space View
+        </a>
+        <button type="button" id="openTutorialBtn" class="cmd-btn" title="Launch Interactive Click-Through Tutorial">
+          <span class="cmd-icon">✦</span> Tour
+        </button>
+      </div>
+    </header>
+
+    <!-- Segmented Glass Pill Navigation -->
+    <div class="nav-pill-shell">
+      <nav class="nav-tabs" role="tablist">
+        <button type="button" class="nav-tab active" data-tab="inspector">
+          <span>Inspector</span>
+          <kbd class="nav-kbd">1</kbd>
+        </button>
+        <button type="button" class="nav-tab" data-tab="tree">
+          <span>Lineage Tree</span>
+          <span class="tab-pill" id="openTabCountBadge">0</span>
+        </button>
+        <button type="button" class="nav-tab" data-tab="export">
+          <span>Focus Studio</span>
+          <kbd class="nav-kbd">3</kbd>
+        </button>
+      </nav>
+    </div>
+
+    <!-- ===================================================================
+         VIEW 1: ACTIVE TAB INSPECTOR (BENTO + INTERACTIVE CIRCUIT GRAPH)
+         =================================================================== -->
+    <main id="view-inspector" class="view-pane active">
+      <!-- Asymmetric Bento Grid: Identity + Temporal Telemetry + Radial Target Ring -->
+      <section class="bento-top-grid">
+        <!-- Bento Tile A: Hero Tab Identity + Telemetry -->
+        <div class="bento-card bento-identity">
+          <div class="identity-header">
+            <div class="favicon-halo">
+              <img id="activeFavicon" src="../icons/icon.svg" alt="" class="tab-favicon" />
+            </div>
+            <div class="identity-titles">
+              <h2 id="activeTabTitle" class="tab-title">Loading active tab…</h2>
+              <div class="domain-row">
+                <span id="activeTabDomain" class="tab-domain">—</span>
+                <button type="button" id="copyUrlBtn" class="micro-icon-btn" title="Copy Tab URL">⧉</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="telemetry-pills">
+            <div class="tele-pill" title="Exact timestamp when this tab was spawned">
+              <span class="tele-dot cyan"></span>
+              <span class="tele-label">Opened</span>
+              <span id="activeOpenedAt" class="tele-val">—</span>
+            </div>
+            <div class="tele-pill" title="Cumulative time spent actively reading this tab">
+              <span class="tele-dot purple"></span>
+              <span class="tele-label">Active</span>
+              <span id="activeDuration" class="tele-val">0s</span>
+            </div>
+            <div class="tele-pill" title="Firefox Container / Zen Workspace binding">
+              <span class="tele-dot emerald"></span>
+              <span id="activeContainer" class="tele-val">Default</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bento Tile B: Interactive SVG Radial Target-Time Ring -->
+        <div class="bento-card bento-ring-card" title="Target-Time Countdown Status">
+          <div class="ring-svg-wrap">
+            <svg class="countdown-ring" viewBox="0 0 64 64">
+              <circle class="ring-track" cx="32" cy="32" r="26" />
+              <circle id="targetRingArc" class="ring-progress" cx="32" cy="32" r="26" />
+            </svg>
+            <div class="ring-center">
+              <span id="ringCenterVal" class="ring-val">—</span>
+              <span id="ringCenterSub" class="ring-sub">IDLE</span>
+            </div>
+          </div>
+          <span id="targetTimeStatus" class="ring-footer-label">No Target</span>
+        </div>
+      </section>
+
+      <!-- Interactive Provenance Lineage Circuit Card -->
+      <section class="bento-card circuit-card">
+        <div class="section-header">
+          <div class="section-title-group">
+            <span class="section-glyph">☍</span>
+            <span class="section-title">Origin &amp; Ctrl+Click Lineage</span>
+          </div>
+          <span id="provenanceTriggerBadge" class="trigger-badge">ctrl+click</span>
+        </div>
+
+        <!-- Visual Circuit Timeline -->
+        <div class="circuit-timeline">
+          <!-- Node 1: Parent Source Page -->
+          <div class="circuit-node origin-node">
+            <div class="node-bullet origin-bullet"></div>
+            <div class="node-body">
+              <div class="node-meta-row">
+                <span class="node-kicker">ORIGIN HUB</span>
+                <div class="prov-actions">
+                  <button type="button" id="focusOpenerBtn" class="mini-pill-btn" hidden>
+                    ↰ Jump to Parent
+                  </button>
+                  <a id="provSourceLink" href="#" target="_blank" class="mini-link-btn" hidden>
+                    Source URL ↗
+                  </a>
+                </div>
+              </div>
+              <div id="provSourceTitle" class="prov-source-title">Direct Navigation / Root Tab</div>
+            </div>
+          </div>
+
+          <!-- Connector Trace + Clicked Anchor Text -->
+          <div class="circuit-node anchor-node" id="provAnchorRow">
+            <div class="node-bullet anchor-bullet"></div>
+            <div class="node-body">
+              <span class="node-kicker">CLICKED ANCHOR TEXT</span>
+              <div class="anchor-code-pill" id="provLinkText">—</div>
+            </div>
+          </div>
+
+          <!-- Node 3: Captured DOM Snippet Terminal -->
+          <div class="circuit-node snippet-node" id="provSnippetRow">
+            <div class="node-bullet snippet-bullet"></div>
+            <div class="node-body">
+              <div class="node-meta-row">
+                <span class="node-kicker">CAPTURED DOM CONTEXT</span>
+                <button type="button" id="copySnippetBtn" class="micro-text-btn" title="Copy DOM Snippet">
+                  Copy
+                </button>
+              </div>
+              <blockquote class="prov-snippet" id="provSnippet">
+                No DOM snippet captured (tab was opened directly or prior to extension load).
+              </blockquote>
+            </div>
+          </div>
+
+          <!-- Optional Selection Highlight -->
+          <div class="circuit-node selection-node" id="provSelectionRow" hidden>
+            <div class="node-bullet selection-bullet"></div>
+            <div class="node-body">
+              <span class="node-kicker">HIGHLIGHTED PARENT SELECTION</span>
+              <div class="prov-selection" id="provSelection"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Action Studio: To-Do, Target-Time Capsules & Scratchpad Note -->
+      <section class="bento-card editor-card">
+        <div class="section-header">
+          <div class="section-title-group">
+            <span class="section-glyph">⚡</span>
+            <span class="section-title">Action Item &amp; Target Schedule</span>
+          </div>
+          <span id="saveIndicator" class="save-indicator">● Synced</span>
+        </div>
+
+        <!-- Tactile To-Do Bar -->
+        <div class="todo-capsule">
+          <label class="custom-check-wrap" title="Mark To-Do Complete">
+            <input type="checkbox" id="todoDoneCheck" class="todo-checkbox" />
+            <span class="custom-checkmark">✓</span>
+          </label>
+          <input
+            type="text"
+            id="todoInput"
+            class="todo-main-input"
+            placeholder="What is your next action on this tab? (e.g. Audit benchmark code)…"
+          />
+        </div>
+
+        <!-- Target-Time Capsule Presets + Datetime Picker -->
+        <div class="schedule-block">
+          <div class="preset-row">
+            <button type="button" class="preset-btn" data-offset-min="30">
+              <span>+30m</span>
+            </button>
+            <button type="button" class="preset-btn" data-offset-min="120">
+              <span>+2h</span>
+            </button>
+            <button type="button" class="preset-btn" data-preset="tonight">
+              <span>Tonight 9p</span>
+            </button>
+            <button type="button" class="preset-btn" data-preset="tomorrow">
+              <span>Tomorrow 10a</span>
+            </button>
+            <button type="button" class="preset-btn clear-btn" id="clearTargetTimeBtn">
+              <span>Reset</span>
+            </button>
+          </div>
+          <div class="datetime-row">
+            <span class="datetime-label">⏰ Custom Target:</span>
+            <input type="datetime-local" id="targetTimeInput" class="text-input datetime-input" />
+          </div>
+        </div>
+
+        <!-- Zen Space & Purpose Taxonomy -->
+        <div class="two-col">
+          <div class="field-group">
+            <label class="field-label" for="spaceTagInput">Zen Workspace Tag</label>
+            <input type="text" id="spaceTagInput" class="text-input" placeholder="e.g., AI Safety" />
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="purposeSelect">Purpose Cluster</label>
+            <select id="purposeSelect" class="select-input">
+              <option value="AI Safety & SecOps">🛡️ AI Safety &amp; SecOps</option>
+              <option value="Code & Repositories">💻 Code &amp; Repositories</option>
+              <option value="Research & Papers">📄 Research &amp; Papers</option>
+              <option value="Docs & Reference">📚 Docs &amp; Reference</option>
+              <option value="Cloud & Billing Admin">☁️ Cloud &amp; Billing Admin</option>
+              <option value="Reading & Media">🎧 Reading &amp; Media</option>
+              <option value="General Exploration">🧭 General Exploration</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Persistent Scratchpad Note -->
+        <div class="field-group">
+          <label class="field-label" for="noteInput">Context Scratchpad Note</label>
+          <textarea
+            id="noteInput"
+            rows="2"
+            class="textarea-input"
+            placeholder="Key findings, quotes, or why this link matters…"
+          ></textarea>
+        </div>
+      </section>
+    </main>
+
+    <!-- ===================================================================
+         VIEW 2: PROVENANCE LINEAGE TREE & ZEN TAB SORTER
+         =================================================================== -->
+    <main id="view-tree" class="view-pane">
+      <div class="tree-command-bar">
+        <div class="group-selector">
+          <span class="toolbar-label">Cluster:</span>
+          <select id="groupModeSelect" class="select-input compact">
+            <option value="referrer">🌳 Origin / Referrer Hub</option>
+            <option value="purpose">🏷️ Purpose Taxonomy</option>
+            <option value="todo">⏰ To-Do &amp; Target Queue</option>
+            <option value="burst">⚡ 15m Session Bursts</option>
+            <option value="space">🪐 Zen Space &amp; Container</option>
+          </select>
+        </div>
+        <button
+          type="button"
+          id="clusterZenTabsBtn"
+          class="magnetic-btn"
+          title="Physically reorder unpinned tabs in Zen Browser's vertical sidebar to match this cluster"
+        >
+          ⇄ Sort Zen Sidebar
+        </button>
+      </div>
+
+      <div class="search-command-wrap">
+        <span class="search-icon">⌕</span>
+        <input
+          type="search"
+          id="treeSearchInput"
+          class="search-command-input"
+          placeholder="Filter by title, origin page, DOM snippet, or To-Do… (Press /)"
+        />
+        <kbd class="search-kbd">/</kbd>
+      </div>
+
+      <div id="groupsContainer" class="groups-container"></div>
+    </main>
+
+    <!-- ===================================================================
+         VIEW 3: FOCUS STUDIO (CALENDAR BLOCKS, ANTIGRAVITY EXPORT & HUD)
+         =================================================================== -->
+    <main id="view-export" class="view-pane">
+      <section class="bento-card studio-hero-card">
+        <div class="section-header">
+          <div class="section-title-group">
+            <span class="section-glyph">🗓️</span>
+            <span class="section-title">Focus Block &amp; Antigravity Export Studio</span>
+          </div>
+          <span class="studio-badge">100% LOCAL · 0 TOKENS</span>
+        </div>
+        <p class="helper-text">
+          Bundle all open tabs that have an active <strong>To-Do</strong> or <strong>Target-Time</strong> into a single Calendar Focus Sprint, or export a provenance-linked Markdown checklist for Antigravity.
+        </p>
+
+        <div class="studio-action-grid">
+          <button type="button" id="openGCalBtn" class="studio-tile-btn primary-tile">
+            <span class="tile-emoji">📅</span>
+            <span class="tile-title">Schedule in Google Calendar</span>
+            <span class="tile-desc">Pre-fills title, time window &amp; provenance links</span>
+          </button>
+
+          <button type="button" id="downloadIcsBtn" class="studio-tile-btn">
+            <span class="tile-emoji">📥</span>
+            <span class="tile-title">Download .ICS Calendar File</span>
+            <span class="tile-desc">Works with Apple Calendar, Outlook &amp; Cron</span>
+          </button>
+
+          <button type="button" id="copyMarkdownBtn" class="studio-tile-btn full-span">
+            <span class="tile-emoji">📋</span>
+            <span class="tile-title">Copy Antigravity Provenance Checklist (.MD)</span>
+            <span class="tile-desc">Markdown task list with parent links, DOM snippets &amp; notes</span>
+          </button>
+        </div>
+
+        <pre id="exportPreviewBox" class="export-preview" hidden></pre>
+      </section>
+
+      <section class="bento-card">
+        <div class="section-header">
+          <div class="section-title-group">
+            <span class="section-glyph">🎛️</span>
+            <span class="section-title">On-Page Micro-HUD &amp; Workspace Preferences</span>
+          </div>
+        </div>
+
+        <label class="toggle-card-row">
+          <input type="checkbox" id="enableMicroHudCheck" checked />
+          <div class="toggle-text">
+            <strong>4.5s On-Page Ctrl+Click Micro-HUD Toast</strong>
+            <span>Show the corner HUD on parent pages when opening links in a background tab</span>
+          </div>
+        </label>
+
+        <div class="field-group" style="margin-top: 10px;">
+          <label class="field-label" for="defaultSpaceInput">Default Zen Workspace / Space Label</label>
+          <input type="text" id="defaultSpaceInput" class="text-input" placeholder="Main Zen Space" />
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="panel.js"></script>
+</body>
+</html>
