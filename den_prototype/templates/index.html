@@ -1679,7 +1679,7 @@ Dave: At what operational overhead though? Let's discuss later."></textarea>
       camera.position.set(0, 3.8, 9.2);
       camera.lookAt(0, 1.2, 0);
 
-      renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+      renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, preserveDrawingBuffer: true });
       renderer.setSize(window.innerWidth, window.innerHeight);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.shadowMap.enabled = true;

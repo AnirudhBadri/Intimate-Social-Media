@@ -49,6 +49,8 @@ The Den is not another monolithic group chat or broadcast feed.
 
 Crucially, **each user has their own sovereign Den**. Your view of the room is centered around *you* and your chosen circle of trust. It is not an objective, locked corporate channel where everyone is forced into the exact same box; it is an egocentric sanctuary where personal friendship webs overlap organically—just like relationships exist in the physical world.
 
+![The 3D Living Room Spatial Canvas](docs/images/den_3d_living_room.png)
+
 ---
 
 ### The Three Invariants
@@ -88,6 +90,8 @@ These traces remove the terrifying inertia of the cold opener. Asking *"Hey, how
 > *"Is that film actually good or did you suffer through it?"*
 
 It turns reaching out from an administrative chore back into a casual, organic nudge.
+
+![Ambient Activity Traces](docs/images/den_activity_traces_modal.png)
 
 #### 3. Zero-Debt Presence
 The biggest friction in modern messaging is the asymmetry of reply obligations:
@@ -134,12 +138,14 @@ With rock-solid privacy guarantees and practically zero-cost local audio transcr
 
 It eliminates the friction of starting over. Your conversations have continuity, depth, and memory.
 
+![Tangent Tracker & Thread Continuity](docs/images/den_tangents_thread_modal.png)
+
 ---
 
 ### Feature Status & Roadmap
 
 > [!NOTE]
-> This project is an ongoing engineering and design exploration. Below is an honest breakdown of what is actually running in the prototype today versus what is partially built or planned.
+> This project is an ongoing engineering and design exploration. Features in the prototype today focus on the core intimate presence, ambient traces, and memory indexer. Complex social serendipity mechanisms (such as host-curated warm introductions across circles) and in-app ambient games (slow-turn board games) are designated for **v2**.
 
 | Feature Area | Component | Status | Reality Check |
 | :--- | :--- | :--- | :--- |
@@ -150,7 +156,8 @@ It eliminates the friction of starting over. Your conversations have continuity,
 | **Conversation Memory** | Tangent Index Cards | **[PARTIALLY DONE]** | In-memory schema & classifier in `tangent_service.py` extracts dropped threads, crossroads, and rabbit holes. Local LLM (Ollama / Whisper) integration for noisy audio transcripts is in progress. |
 | **Privacy & Storage** | Local Encrypted Vault | **[PARTIALLY DONE]** | Currently uses local in-memory/SQLite state; cryptographic at-rest vault for tangent cards is on the roadmap. |
 | **Audio Hub** | 1-on-1 Acoustic Booth | **[PLANNED]** | Private WebRTC audio pipe with automatic ambient room soundscapes and ephemeral voice dispatches. |
-| **Social Serendipity** | Warm Introductions & Circle Weaving | **[PLANNED]** | Host-curated guest passes and shared-interest bridge notes to introduce friends across sovereign circles without algorithmic contact farming. |
+| **Social Serendipity (v2)** | Warm Introductions & Circle Weaving | **[PLANNED (v2)]** | Host-curated guest passes and shared-interest bridge notes to introduce friends across sovereign circles without algorithmic contact farming. |
+| **Ambient Games (v2)** | Asynchronous Slow Board Games | **[PLANNED (v2)]** | 1-move-per-day low-stakes board game at the table moving at the pace of real human life. |
 | **Multi-Den Federation** | Sovereign Private Nodes | **[PLANNED]** | Self-hosted instances communicating peer-to-peer without a centralized cloud platform. |
 
 ---
@@ -171,6 +178,8 @@ Three.js WebGL canvas:       Passive real-time telemetry:  Air-gapped contexts:
 • Interactive furnishings    • GitHub activity feeds       • Sovereign Hearth
 ```
 
+![The Den Master Blueprints Reader](docs/images/den_blueprints_strategy_reader.png)
+
 ---
 
 ### Running The Den
@@ -189,6 +198,8 @@ Open your browser to:
 ```text
 http://127.0.0.1:8090
 ```
+
+![Avatar Studio Customizer](docs/images/den_avatar_studio_customizer.png)
 
 ---
 
