@@ -34,7 +34,20 @@ The downstream consequences of this design aren't just annoying quirks—they sy
 - **The Effort Asymmetry (Why People Stop Reaching Out):** In almost every friendship, one person is usually the one putting in the effort to reach out first. But after a few delayed replies or getting left on "seen," they start feeling like an annoying bother, a nuisance, or simply forgotten. Eventually, exhausted by the silence and feeling unreciprocated, they quietly stop initiating—and the friendship slowly evaporates into nothingness.
 - **The Surface-Level "Catch-Up" Trap:** On the rare occasion you finally jump on a call or meet up, 80% of the time is burned merely catching up on factual logistics: *"Where are you living now? How's work? Did you change teams?"* You run out of time before ever reaching the deep, substantive core of what either of you actually cares about.
 
-**The Den** is an experiment in the opposite direction. It is a standalone, bounded digital sanctuary built on three immovable boundaries.
+**The Den** is an experiment in the opposite direction.
+
+---
+
+### The Solution: Intimacy Through Shared Resonance
+
+> *புணர்ச்சி பழகுதல் வேண்டா உணர்ச்சிதான்*  
+> *நட்பாங் கிழமை தரும்.*  
+> — **திருக்குறள் 786 (Tirukkural 786)**  
+> *(Intimacy does not depend on continuous physical contact or ceaseless mingling; it is the shared mutual resonance that grants friendship its sovereign right.)*
+
+The Den is not another monolithic group chat or broadcast feed.
+
+Crucially, **each user has their own sovereign Den**. Your view of the room is centered around *you* and your chosen circle of trust. It is not an objective, locked corporate channel where everyone is forced into the exact same box; it is an egocentric sanctuary where personal friendship webs overlap organically—just like relationships exist in the physical world.
 
 ---
 
@@ -137,6 +150,7 @@ It eliminates the friction of starting over. Your conversations have continuity,
 | **Conversation Memory** | Tangent Index Cards | **[PARTIALLY DONE]** | In-memory schema & classifier in `tangent_service.py` extracts dropped threads, crossroads, and rabbit holes. Local LLM (Ollama / Whisper) integration for noisy audio transcripts is in progress. |
 | **Privacy & Storage** | Local Encrypted Vault | **[PARTIALLY DONE]** | Currently uses local in-memory/SQLite state; cryptographic at-rest vault for tangent cards is on the roadmap. |
 | **Audio Hub** | 1-on-1 Acoustic Booth | **[PLANNED]** | Private WebRTC audio pipe with automatic ambient room soundscapes and ephemeral voice dispatches. |
+| **Social Serendipity** | Warm Introductions & Circle Weaving | **[PLANNED]** | Host-curated guest passes and shared-interest bridge notes to introduce friends across sovereign circles without algorithmic contact farming. |
 | **Multi-Den Federation** | Sovereign Private Nodes | **[PLANNED]** | Self-hosted instances communicating peer-to-peer without a centralized cloud platform. |
 
 ---
